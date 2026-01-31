@@ -9,11 +9,14 @@ import AdminRoute from './components/AdminRoute';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 
+
+
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+
       <Route path="/signup" element={<Signup />} />
       <Route path="/about-us" element={<AboutUs />} />
       <Route path="/cancellation-policy" element={<CancellationPolicy />} />

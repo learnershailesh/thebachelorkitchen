@@ -1,6 +1,6 @@
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
-import { Home, CheckCircle, XCircle, AlertCircle, Calendar, Clock, RefreshCw, Phone, Gift, ShieldCheck, FileText } from 'lucide-react';
+import { Home, CheckCircle, XCircle, AlertCircle, Calendar, Clock, RefreshCw, Phone, Gift, ShieldCheck, FileText, Instagram, Youtube, Linkedin, Twitter } from 'lucide-react';
 
 const CancellationPolicy = () => {
     return (
@@ -310,11 +310,49 @@ const CancellationPolicy = () => {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-[var(--primary-dark)] text-white py-8">
-                <div className="container text-center">
-                    <p className="opacity-70 text-sm">© 2025 The Bachelor's Kitchen. All rights reserved.</p>
-                    <p className="opacity-50 text-xs mt-2">Last updated: January 2025</p>
+            {/* Enhanced Footer */}
+            <footer className="bg-[var(--primary-dark)] text-white py-12">
+                <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 text-left">
+                    <div>
+                        <h3 className="text-white text-xl mb-4 font-bold">The Bachelor's Kitchen</h3>
+                        <p className="opacity-70 text-sm">Delivering happiness, one tiffin at a time.</p>
+                    </div>
+                    <div>
+                        <h4 className="text-white mb-4 font-bold">Quick Links</h4>
+                        <ul className="space-y-2 opacity-70 text-sm">
+                            <li><Link to="/about-us" className="hover:text-[var(--secondary)] transition">About Us</Link></li>
+                            <li><Link to="/cancellation-policy" className="hover:text-[var(--secondary)] transition">Cancellation Policy</Link></li>
+                            <li><Link to="/" className="hover:text-[var(--secondary)] transition">Home</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="text-white mb-4 font-bold">Contact</h4>
+                        <ul className="space-y-2 opacity-70 text-sm">
+                            <li>+91 73071 91299</li>
+                            <li>reachus@thebachelorskitchens.com</li>
+                            <li>Varanasi, Uttar Pradesh</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="text-white mb-4 font-bold">Follow Us</h4>
+                        <div className="flex gap-4">
+                            <a href="https://www.linkedin.com/company/the-bachelor-s-kitchens/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#0077b5] transition-all flex items-center justify-center group">
+                                <Linkedin size={20} className="text-white group-hover:scale-110 transition-transform" />
+                            </a>
+                            <a href="https://www.instagram.com/thebachelors.kitchens?igsh=bHcybHUxeGpoZmM3&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] transition-all flex items-center justify-center group">
+                                <Instagram size={20} className="text-white group-hover:scale-110 transition-transform" />
+                            </a>
+                            <a href="https://youtube.com/@thebachelors.kitchens?si=Q_d7zVvpyD9dBF4t" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff0000] transition-all flex items-center justify-center group">
+                                <Youtube size={20} className="text-white group-hover:scale-110 transition-transform" />
+                            </a>
+                            <a href="https://x.com/tbkbharat" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-black transition-all flex items-center justify-center group">
+                                <Twitter size={20} className="text-white group-hover:scale-110 transition-transform" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div className="text-center pt-8 border-t border-white/10 opacity-50 text-xs">
+                    © 2025 The Bachelor's Kitchen. All rights reserved.
                 </div>
             </footer>
         </div>

@@ -1,5 +1,5 @@
 import Navbar from '../components/Navbar';
-import { CheckCircle, Clock, Calendar, Star, Leaf, Flame, Play, Quote, ChevronRight, ChevronDown, Smartphone, ShieldCheck, Sprout } from 'lucide-react';
+import { CheckCircle, Clock, Calendar, Star, Leaf, Flame, Play, Quote, ChevronRight, ChevronDown, Smartphone, ShieldCheck, Sprout, Instagram, Youtube, Linkedin, Twitter } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -103,8 +103,18 @@ const Landing = () => {
             }
         };
 
-        fetchPlans();
-        fetchVideos();
+        const loadAll = async () => {
+            await Promise.all([fetchPlans(), fetchVideos()]);
+            // After data is loaded and rendered, check if we need to scroll to a hash
+            if (window.location.hash) {
+                const id = window.location.hash.substring(1);
+                setTimeout(() => {
+                    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+        };
+
+        loadAll();
     }, [api]);
 
     const handleSubscribe = async (plan) => {
@@ -469,8 +479,8 @@ const Landing = () => {
                                     <button
                                         onClick={() => handleSubscribe(plan)}
                                         className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 group/btn ${plan.recommended
-                                                ? 'bg-[var(--primary)] text-white shadow-lg shadow-green-200 hover:bg-[var(--primary-dark)]'
-                                                : 'bg-white border-2 border-gray-100 text-[var(--primary-dark)] hover:border-[var(--primary)] hover:bg-gray-50 shadow-sm'
+                                            ? 'bg-[var(--primary)] text-white shadow-lg shadow-green-200 hover:bg-[var(--primary-dark)]'
+                                            : 'bg-white border-2 border-gray-100 text-[var(--primary-dark)] hover:border-[var(--primary)] hover:bg-gray-50 shadow-sm'
                                             }`}>
                                         {billingCycle === 'trial' ? 'Start Trial Now' : 'Subscribe Now'}
                                         <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
@@ -541,10 +551,18 @@ const Landing = () => {
                     <div>
                         <h4 className="text-white mb-4">Follow Us</h4>
                         <div className="flex gap-4">
-                            {/* Social Icons Placeholder */}
-                            <div className="w-8 h-8 rounded-full bg-white/20 hover:bg-[var(--secondary)] hover:text-[var(--primary)] transition cursor-pointer flex items-center justify-center">FB</div>
-                            <div className="w-8 h-8 rounded-full bg-white/20 hover:bg-[var(--secondary)] hover:text-[var(--primary)] transition cursor-pointer flex items-center justify-center">IG</div>
-                            <div className="w-8 h-8 rounded-full bg-white/20 hover:bg-[var(--secondary)] hover:text-[var(--primary)] transition cursor-pointer flex items-center justify-center">X</div>
+                            <a href="https://www.linkedin.com/company/the-bachelor-s-kitchens/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#0077b5] hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+                                <Linkedin size={20} className="text-white group-hover:animate-pulse" />
+                            </a>
+                            <a href="https://www.instagram.com/thebachelors.kitchens?igsh=bHcybHUxeGpoZmM3&utm_source=qr" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+                                <Instagram size={20} className="text-white group-hover:animate-pulse" />
+                            </a>
+                            <a href="https://youtube.com/@thebachelors.kitchens?si=Q_d7zVvpyD9dBF4t" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#ff0000] hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+                                <Youtube size={20} className="text-white group-hover:animate-pulse" />
+                            </a>
+                            <a href="https://x.com/tbkbharat" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-white/10 hover:bg-black hover:scale-110 transition-all duration-300 flex items-center justify-center group">
+                                <Twitter size={20} className="text-white group-hover:animate-pulse" />
+                            </a>
                         </div>
                     </div>
                 </div>

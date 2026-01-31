@@ -85,8 +85,6 @@ const loginUser = asyncHandler(async (req, res) => {
 
 const Notification = require('../models/Notification');
 
-// ... (existing imports)
-
 // @desc    Update user profile
 // @route   PUT /api/auth/profile
 // @access  Private
@@ -126,31 +124,79 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
-const otpLogin = asyncHandler(async (req, res) => {
-    const { phone } = req.body;
+const jwksClient = require('jwks-rsa');
 
-    if (!phone) {
-        res.status(400);
-        throw new Error('Phone number is required');
-    }
+const client = jwksClient({
+    jwksUri: 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
+});
 
-    // Since Firebase verified the phone on frontend, we find the user in our DB
-    const user = await User.findOne({ phone });
-
-    if (!user) {
-        res.status(404);
-        throw new Error('User not found. Please sign up first.');
-    }
-
-    res.json({
-        _id: user.id,
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        role: user.role,
-        address: user.address,
-        token: generateToken(user._id)
+function getKey(header, callback) {
+    client.getSigningKey(header.kid, function (err, key) {
+        if (err) {
+            callback(err);
+        } else {
+            const signingKey = key.getPublicKey();
+            callback(null, signingKey);
+        }
     });
+}
+
+const verifyFirebaseToken = (idToken) => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(idToken, getKey, {
+            audience: process.env.FIREBASE_PROJECT_ID,
+            issuer: `https://securetoken.google.com/${process.env.FIREBASE_PROJECT_ID}`,
+            algorithms: ['RS256']
+        }, (err, decoded) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(decoded);
+            }
+        });
+    });
+};
+
+const otpLogin = asyncHandler(async (req, res) => {
+    const { idToken } = req.body;
+
+    if (!idToken) {
+        res.status(400);
+        throw new Error('ID Token is required');
+    }
+
+    try {
+        // Verify the ID token manually using Google's public keys
+        const decodedToken = await verifyFirebaseToken(idToken);
+        const firebasePhone = decodedToken.phone_number;
+
+        if (!firebasePhone) {
+            res.status(400);
+            throw new Error('Could not retrieve phone number from token');
+        }
+
+        const phone = firebasePhone.replace('+91', '');
+        const user = await User.findOne({ phone });
+
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found. Please sign up first.');
+        }
+
+        res.json({
+            _id: user.id,
+            name: user.name,
+            phone: user.phone,
+            email: user.email,
+            role: user.role,
+            address: user.address,
+            token: generateToken(user._id)
+        });
+    } catch (error) {
+        console.error('Manual Token verification failed:', error);
+        res.status(401);
+        throw new Error('Invalid or expired OTP token');
+    }
 });
 
 module.exports = {

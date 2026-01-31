@@ -18,36 +18,50 @@ const Login = () => {
     const { login, loginWithOtp, api } = useAuth();
     const navigate = useNavigate();
 
-    const setupRecaptcha = (containerId) => {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-                'size': 'invisible',
-                'callback': (response) => {
-                    // reCAPTCHA solved, allow signInWithPhoneNumber.
-                }
-            });
+
+    const setupRecaptcha = () => {
+        if (window.recaptchaVerifier) {
+            window.recaptchaVerifier.clear();
+            window.recaptchaVerifier = null;
         }
+
+        window.recaptchaVerifier = new RecaptchaVerifier(
+            auth,
+            "recaptcha-container",
+            {
+                size: "invisible",
+            }
+        );
     };
+
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
-        if (!phone || phone.length < 10) {
-            setError('Please enter a valid phone number');
+
+        if (!phone || phone.length !== 10) {
+            setError("Enter valid 10-digit phone number");
             return;
         }
 
         setLoading(true);
-        setError('');
+        setError("");
+
         try {
-            setupRecaptcha('recaptcha-container');
-            const appVerifier = window.recaptchaVerifier;
-            const formatPhone = phone.startsWith('+91') ? phone : `+91${phone}`;
-            const result = await signInWithPhoneNumber(auth, formatPhone, appVerifier);
-            setConfirmationResult(result);
+            setupRecaptcha();
+
+            const formattedPhone = `+91${phone}`;
+            const confirmation = await signInWithPhoneNumber(
+                auth,
+                formattedPhone,
+                window.recaptchaVerifier
+            );
+
+            setConfirmationResult(confirmation);
             setOtpSent(true);
         } catch (err) {
             console.error(err);
-            setError('Failed to send OTP. Check your phone number or try again.');
+            setError(err.message || "Failed to send OTP");
+
             if (window.recaptchaVerifier) {
                 window.recaptchaVerifier.clear();
                 window.recaptchaVerifier = null;
@@ -56,6 +70,7 @@ const Login = () => {
             setLoading(false);
         }
     };
+
 
     const handleVerifyOtp = async (e) => {
         e.preventDefault();
@@ -69,11 +84,12 @@ const Login = () => {
         try {
             const result = await confirmationResult.confirm(otp);
             const user = result.user;
-            // Use context method for login
-            const loggedInUser = await loginWithOtp(
-                user.phoneNumber.replace('+91', ''),
-                user.uid
-            );
+
+            // Get the secure ID token from Firebase
+            const idToken = await user.getIdToken();
+
+            // Use context method for login, passing the token instead of raw phone
+            const loggedInUser = await loginWithOtp(idToken);
 
             if (loggedInUser.role === 'admin') navigate('/admin');
             else navigate('/dashboard');
@@ -132,7 +148,7 @@ const Login = () => {
                         <p className="text-gray-500 text-sm">Please login to your account</p>
                     </div>
 
-                    {/* Login Method Toggle */}
+                    {/* Login Method Toggle - Temporarily Disabled
                     <div className="flex p-1 bg-gray-100 rounded-xl mb-8">
                         <button
                             onClick={() => { setLoginMethod('password'); setError(''); }}
@@ -146,7 +162,8 @@ const Login = () => {
                         >
                             Phone OTP
                         </button>
-                    </div>
+                    </div> 
+                    */}
 
                     {error && (
                         <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-6 border border-red-100">
@@ -250,10 +267,12 @@ const Login = () => {
                         Don't have an account? <Link to="/signup" className="text-[var(--primary)] font-bold hover:underline">Sign Up</Link>
                     </div>
 
+                    {/* 
                     <div className="mt-8 pt-8 border-t border-gray-100 flex items-center justify-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                         <ShieldCheck size={14} className="text-green-500" />
                         Secure OTP via Firebase
-                    </div>
+                    </div> 
+                    */}
                 </div>
             </div>
         </div>

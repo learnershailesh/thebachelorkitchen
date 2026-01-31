@@ -50,4 +50,8 @@ const subscriptionSchema = mongoose.Schema({
     timestamps: true
 });
 
+subscriptionSchema.index({ userId: 1 });
+subscriptionSchema.index({ status: 1 });
+subscriptionSchema.index({ startDate: 1, endDate: 1 });
+
 module.exports = mongoose.model('Subscription', subscriptionSchema);

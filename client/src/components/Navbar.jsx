@@ -30,20 +30,42 @@ const Navbar = () => {
     );
 
     const checkScroll = (id) => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        if (window.location.pathname !== '/') {
+            navigate(`/#${id}`);
+        } else {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
         setIsMobileOpen(false);
     }
 
     return (
         <nav className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 px-6 py-3 shadow-sm transition-all duration-300">
             <div className="container flex justify-between items-center max-w-7xl mx-auto relative">
-                <Link to="/" className="flex items-center gap-2 group z-50">
+                <Link
+                    to="/"
+                    onClick={() => {
+                        if (window.location.pathname === '/') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    }}
+                    className="flex items-center gap-2 group z-50"
+                >
                     <img src="/TBKLogo1.png" alt="The Bachelor's Kitchen" className="h-14 md:h-16 w-auto transition-transform duration-300 group-hover:scale-105" />
                 </Link>
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-8 text-gray-600 font-medium">
-                    <Link to="/" className="hover:text-[var(--primary)] transition-colors duration-200">Home</Link>
+                    <Link
+                        to="/"
+                        onClick={() => {
+                            if (window.location.pathname === '/') {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
+                        }}
+                        className="hover:text-[var(--primary)] transition-colors duration-200"
+                    >
+                        Home
+                    </Link>
                     <Link to="/about-us" className="hover:text-[var(--primary)] transition-colors duration-200">About Us</Link>
                     <button onClick={() => checkScroll('kitchen')} className="hover:text-[var(--primary)] transition-colors duration-200">Kitchen Stories</button>
                     <button onClick={() => checkScroll('plans')} className="hover:text-[var(--primary)] transition-colors duration-200">Our Plans</button>
@@ -88,7 +110,16 @@ const Navbar = () => {
                 {/* Mobile Menu Overlay */}
                 {isMobileOpen && (
                     <div className="absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-100 flex flex-col p-6 gap-4 md:hidden animate-fade-in z-40">
-                        <NavLink to="/">Home</NavLink>
+                        <NavLink
+                            to="/"
+                            onClick={() => {
+                                if (window.location.pathname === '/') {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            }}
+                        >
+                            Home
+                        </NavLink>
                         <NavLink to="/about-us">About Us</NavLink>
                         <button onClick={() => checkScroll('kitchen')} className="text-left py-2 hover:text-[var(--primary)]">Kitchen Stories</button>
                         <button onClick={() => checkScroll('plans')} className="text-left py-2 hover:text-[var(--primary)]">Our Plans</button>

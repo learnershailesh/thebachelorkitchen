@@ -85,9 +85,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithOtp = async (phone, firebaseUid) => {
+  const loginWithOtp = async (idToken) => {
     try {
-      const { data } = await api.post('/auth/otp-login', { phone, uid: firebaseUid });
+      const { data } = await api.post('/auth/otp-login', { idToken });
 
       const userObj = {
         _id: data._id,
