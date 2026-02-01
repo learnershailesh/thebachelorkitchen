@@ -2,6 +2,18 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
+const nodemailer = require('nodemailer');
+
+// Nodemailer Transporter Configuration
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+    },
+});
 
 // Generate JWT
 const generateToken = (id) => {
@@ -124,84 +136,99 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
-const jwksClient = require('jwks-rsa');
+// @desc    Send OTP to email
+// @route   POST /api/auth/send-otp
+// @access  Public
+const sendEmailOTP = asyncHandler(async (req, res) => {
+    const { email } = req.body;
 
-const client = jwksClient({
-    jwksUri: 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
-});
-
-function getKey(header, callback) {
-    client.getSigningKey(header.kid, function (err, key) {
-        if (err) {
-            callback(err);
-        } else {
-            const signingKey = key.getPublicKey();
-            callback(null, signingKey);
-        }
-    });
-}
-
-const verifyFirebaseToken = (idToken) => {
-    return new Promise((resolve, reject) => {
-        jwt.verify(idToken, getKey, {
-            audience: process.env.FIREBASE_PROJECT_ID,
-            issuer: `https://securetoken.google.com/${process.env.FIREBASE_PROJECT_ID}`,
-            algorithms: ['RS256']
-        }, (err, decoded) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(decoded);
-            }
-        });
-    });
-};
-
-const otpLogin = asyncHandler(async (req, res) => {
-    const { idToken } = req.body;
-
-    if (!idToken) {
+    if (!email) {
         res.status(400);
-        throw new Error('ID Token is required');
+        throw new Error('Please enter an email address');
     }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        res.status(404);
+        throw new Error('No account found with this email');
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+    user.otp = otp;
+    user.otpExpire = otpExpire;
+    await user.save();
+
+    // Send Email
+    const mailOptions = {
+        from: `"The Bachelor's Kitchen" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: 'Your Login OTP - The Bachelor\'s Kitchen',
+        html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                <h2 style="color: #f59e0b;">Welcome Back!</h2>
+                <p>Use the following OTP to log in to your account. This code is valid for 10 minutes.</p>
+                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
+                    ${otp}
+                </div>
+                <p>If you didn't request this, please ignore this email.</p>
+                <p>Best regards,<br>The Bachelor's Kitchen Team</p>
+            </div>
+        `,
+    };
 
     try {
-        // Verify the ID token manually using Google's public keys
-        const decodedToken = await verifyFirebaseToken(idToken);
-        const firebasePhone = decodedToken.phone_number;
-
-        if (!firebasePhone) {
-            res.status(400);
-            throw new Error('Could not retrieve phone number from token');
-        }
-
-        const phone = firebasePhone.replace('+91', '');
-        const user = await User.findOne({ phone });
-
-        if (!user) {
-            res.status(404);
-            throw new Error('User not found. Please sign up first.');
-        }
-
-        res.json({
-            _id: user.id,
-            name: user.name,
-            phone: user.phone,
-            email: user.email,
-            role: user.role,
-            address: user.address,
-            token: generateToken(user._id)
-        });
+        await transporter.sendMail(mailOptions);
+        res.status(200).json({ message: 'OTP sent to email' });
     } catch (error) {
-        console.error('Manual Token verification failed:', error);
-        res.status(401);
-        throw new Error('Invalid or expired OTP token');
+        console.error('Email sending failed:', error);
+        res.status(500);
+        throw new Error('Failed to send OTP email');
     }
 });
+
+// @desc    Verify Email OTP
+// @route   POST /api/auth/verify-otp
+// @access  Public
+const verifyEmailOTP = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+        res.status(400);
+        throw new Error('Email and OTP are required');
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user || user.otp !== otp || user.otpExpire < new Date()) {
+        res.status(400);
+        throw new Error('Invalid or expired OTP');
+    }
+
+    // Clear OTP after successful login
+    user.otp = null;
+    user.otpExpire = null;
+    await user.save();
+
+    res.json({
+        _id: user.id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+        address: user.address,
+        token: generateToken(user._id)
+    });
+});
+
 
 module.exports = {
     registerUser,
     loginUser,
-    otpLogin,
+    sendEmailOTP,
+    verifyEmailOTP,
     updateUserProfile
 };

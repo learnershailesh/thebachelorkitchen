@@ -85,9 +85,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithOtp = async (idToken) => {
+  const sendEmailOtp = async (email) => {
     try {
-      const { data } = await api.post('/auth/otp-login', { idToken });
+      const { data } = await api.post('/auth/send-otp', { email });
+      return data;
+    } catch (error) {
+      throw error.response?.data?.message || 'Failed to send OTP';
+    }
+  };
+
+  const verifyEmailOtp = async (email, otp) => {
+    try {
+      const { data } = await api.post('/auth/verify-otp', { email, otp });
 
       const userObj = {
         _id: data._id,
@@ -108,7 +117,7 @@ export const AuthProvider = ({ children }) => {
 
       return userObj;
     } catch (error) {
-      throw error.response?.data?.message || 'OTP Login failed';
+      throw error.response?.data?.message || 'OTP verification failed';
     }
   };
 
@@ -147,7 +156,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, loginWithOtp, loading, api }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, sendEmailOtp, verifyEmailOtp, loading, api }}>
       {!loading && children}
     </AuthContext.Provider>
   );

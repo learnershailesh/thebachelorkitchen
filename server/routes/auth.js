@@ -5,7 +5,8 @@ const { registerUser, loginUser, otpLogin, updateUserProfile } = require('../con
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.post('/otp-login', otpLogin);
+router.post('/send-otp', sendEmailOTP);
+router.post('/verify-otp', verifyEmailOTP);
 router.put('/profile', protect, updateUserProfile);
 
 module.exports = router;

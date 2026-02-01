@@ -1,45 +1,27 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { UtensilsCrossed, ArrowRight, Phone, Lock, Home, ShieldCheck, KeyRound } from 'lucide-react';
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
-import { auth } from '../firebaseConfig';
+import { Mail, ArrowRight, Phone, Lock, Home, ShieldCheck, KeyRound } from 'lucide-react';
 
 const Login = () => {
     const [phone, setPhone] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
-    const [loginMethod, setLoginMethod] = useState('password'); // 'password' or 'otp'
+    const [loginMethod, setLoginMethod] = useState('otp'); // Default to email otp
     const [otpSent, setOtpSent] = useState(false);
-    const [confirmationResult, setConfirmationResult] = useState(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { login, loginWithOtp, api } = useAuth();
+    const { login, sendEmailOtp, verifyEmailOtp } = useAuth();
     const navigate = useNavigate();
-
-
-    const setupRecaptcha = () => {
-        if (window.recaptchaVerifier) {
-            window.recaptchaVerifier.clear();
-            window.recaptchaVerifier = null;
-        }
-
-        window.recaptchaVerifier = new RecaptchaVerifier(
-            auth,
-            "recaptcha-container",
-            {
-                size: "invisible",
-            }
-        );
-    };
 
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
 
-        if (!phone || phone.length !== 10) {
-            setError("Enter valid 10-digit phone number");
+        if (!email) {
+            setError("Please enter your registered email");
             return;
         }
 
@@ -47,25 +29,10 @@ const Login = () => {
         setError("");
 
         try {
-            setupRecaptcha();
-
-            const formattedPhone = `+91${phone}`;
-            const confirmation = await signInWithPhoneNumber(
-                auth,
-                formattedPhone,
-                window.recaptchaVerifier
-            );
-
-            setConfirmationResult(confirmation);
+            await sendEmailOtp(email);
             setOtpSent(true);
         } catch (err) {
-            console.error(err);
-            setError(err.message || "Failed to send OTP");
-
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
-            }
+            setError(err || "Failed to send OTP");
         } finally {
             setLoading(false);
         }
@@ -82,20 +49,12 @@ const Login = () => {
         setLoading(true);
         setError('');
         try {
-            const result = await confirmationResult.confirm(otp);
-            const user = result.user;
-
-            // Get the secure ID token from Firebase
-            const idToken = await user.getIdToken();
-
-            // Use context method for login, passing the token instead of raw phone
-            const loggedInUser = await loginWithOtp(idToken);
+            const loggedInUser = await verifyEmailOtp(email, otp);
 
             if (loggedInUser.role === 'admin') navigate('/admin');
             else navigate('/dashboard');
         } catch (err) {
-            console.error(err);
-            setError(typeof err === 'string' ? err : 'Invalid OTP or User not found.');
+            setError(err || 'Invalid OTP or User not found.');
         } finally {
             setLoading(false);
         }
@@ -115,7 +74,6 @@ const Login = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-4">
-            <div id="recaptcha-container"></div>
             <div className="bg-white rounded-[20px] shadow-2xl overflow-hidden flex w-full max-w-4xl min-h-[600px]">
 
                 {/* Left Side - Brand & Hero (Hidden on Mobile) */}
@@ -148,22 +106,21 @@ const Login = () => {
                         <p className="text-gray-500 text-sm">Please login to your account</p>
                     </div>
 
-                    {/* Login Method Toggle - Temporarily Disabled
                     <div className="flex p-1 bg-gray-100 rounded-xl mb-8">
+                        <button
+                            onClick={() => { setLoginMethod('otp'); setError(''); setOtpSent(false); }}
+                            className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${loginMethod === 'otp' ? 'bg-white text-[var(--primary)] shadow-sm' : 'text-gray-500'}`}
+                        >
+                            Email OTP
+                        </button>
                         <button
                             onClick={() => { setLoginMethod('password'); setError(''); }}
                             className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${loginMethod === 'password' ? 'bg-white text-[var(--primary)] shadow-sm' : 'text-gray-500'}`}
                         >
                             Password
                         </button>
-                        <button
-                            onClick={() => { setLoginMethod('otp'); setError(''); }}
-                            className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${loginMethod === 'otp' ? 'bg-white text-[var(--primary)] shadow-sm' : 'text-gray-500'}`}
-                        >
-                            Phone OTP
-                        </button>
-                    </div> 
-                    */}
+                    </div>
+
 
                     {error && (
                         <div className="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-6 border border-red-100">
@@ -214,15 +171,16 @@ const Login = () => {
                     ) : (
                         <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp}>
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-3.5 text-gray-400"><Phone size={18} /></span>
+                                    <span className="absolute left-3 top-3.5 text-gray-400"><Mail size={18} /></span>
                                     <input
-                                        type="text"
+                                        type="email"
                                         disabled={otpSent}
+                                        placeholder="your@email.com"
                                         className="w-full pl-10 pr-4 py-3 bg-[var(--light)] border border-transparent rounded-lg focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-green-50 transition outline-none font-medium disabled:opacity-50"
-                                        value={phone}
-                                        onChange={(e) => setPhone(e.target.value)}
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
                                     />
                                 </div>
                             </div>
@@ -247,7 +205,7 @@ const Login = () => {
                                         onClick={() => { setOtpSent(false); setOtp(''); }}
                                         className="text-xs text-[var(--primary)] mt-2 font-bold hover:underline"
                                     >
-                                        Change Phone Number
+                                        Change Email Address
                                     </button>
                                 </div>
                             )}
@@ -267,12 +225,11 @@ const Login = () => {
                         Don't have an account? <Link to="/signup" className="text-[var(--primary)] font-bold hover:underline">Sign Up</Link>
                     </div>
 
-                    {/* 
                     <div className="mt-8 pt-8 border-t border-gray-100 flex items-center justify-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                         <ShieldCheck size={14} className="text-green-500" />
-                        Secure OTP via Firebase
-                    </div> 
-                    */}
+                        Secure Email OTP Auth
+                    </div>
+
                 </div>
             </div>
         </div>
