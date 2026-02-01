@@ -33,12 +33,36 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('Please add all fields');
     }
 
-    // Check if user exists (phone or email)
-    const userExists = await User.findOne({ $or: [{ phone }, { email }] });
-
-    if (userExists) {
+    // Email Regex Validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
         res.status(400);
-        throw new Error('User with this phone or email already exists');
+        throw new Error('Please enter a valid email address');
+    }
+
+    // Phone Regex Validation (10 digits Indian)
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+        res.status(400);
+        throw new Error('Please enter a valid 10-digit mobile number');
+    }
+
+    if (password.length < 6) {
+        res.status(400);
+        throw new Error('Password must be at least 6 characters long');
+    }
+
+    // Check if user exists (phone or email) - Specific checks for better error messages
+    const emailExists = await User.findOne({ email: email.toLowerCase() });
+    if (emailExists) {
+        res.status(400);
+        throw new Error('An account with this email already exists');
+    }
+
+    const phoneExists = await User.findOne({ phone });
+    if (phoneExists) {
+        res.status(400);
+        throw new Error('An account with this mobile number already exists');
     }
 
     // Hash password
@@ -49,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create({
         name,
         phone,
-        email,
+        email: email.toLowerCase(),
         password: hashedPassword,
         address
     });
@@ -158,13 +182,16 @@ const sendEmailOTP = asyncHandler(async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
+    // Reset attempts on new OTP request
     user.otp = otp;
     user.otpExpire = otpExpire;
+    user.otpAttempts = 0;
+    user.otpLockedUntil = null;
     await user.save();
 
     // Send Email
     const mailOptions = {
-        from: `"The Bachelor's Kitchen" <${process.env.SMTP_USER}>`,
+        from: `"The Bachelor's Kitchen" <${process.env.SMTP_FROM_EMAIL}>`,
         to: email,
         subject: 'Your Login OTP - The Bachelor\'s Kitchen',
         html: `
@@ -184,9 +211,9 @@ const sendEmailOTP = asyncHandler(async (req, res) => {
         await transporter.sendMail(mailOptions);
         res.status(200).json({ message: 'OTP sent to email' });
     } catch (error) {
-        console.error('Email sending failed:', error);
+        console.error('Email sending failed details:', error);
         res.status(500);
-        throw new Error('Failed to send OTP email');
+        throw new Error(`Failed to send OTP email: ${error.message}`);
     }
 });
 
@@ -201,16 +228,30 @@ const verifyEmailOTP = asyncHandler(async (req, res) => {
         throw new Error('Email and OTP are required');
     }
 
-    const user = await User.findOne({ email });
+    // Brute-force protection
+    if (user.otpLockedUntil && user.otpLockedUntil > new Date()) {
+        res.status(429);
+        throw new Error('Account locked due to too many failed attempts. Please try again later.');
+    }
 
-    if (!user || user.otp !== otp || user.otpExpire < new Date()) {
+    if (!user.otp || user.otp !== otp || user.otpExpire < new Date()) {
+        user.otpAttempts += 1;
+        if (user.otpAttempts >= 5) {
+            user.otpLockedUntil = new Date(Date.now() + 30 * 60 * 1000); // Lock for 30 mins
+            await user.save();
+            res.status(401);
+            throw new Error('Too many failed attempts. Account locked for 30 minutes.');
+        }
+        await user.save();
         res.status(400);
         throw new Error('Invalid or expired OTP');
     }
 
-    // Clear OTP after successful login
+    // Clear OTP and attempts after successful login
     user.otp = null;
     user.otpExpire = null;
+    user.otpAttempts = 0;
+    user.otpLockedUntil = null;
     await user.save();
 
     res.json({

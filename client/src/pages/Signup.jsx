@@ -16,20 +16,68 @@ const Signup = () => {
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        // Restrict phone to numbers only and max 10 digits
+        if (name === 'phone') {
+            const numericValue = value.replace(/\D/g, '').slice(0, 10);
+            setFormData({ ...formData, [name]: numericValue });
+            return;
+        }
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const validateEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    };
+
+    const validatePhone = (phone) => {
+        const re = /^[6-9]\d{9}$/; // Indian 10-digit number starting with 6-9
+        return re.test(phone);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Validate
-        if (!formData.name || !formData.email || !formData.phone || !formData.password || !formData.address) {
+
+        // Create clean copies for validation and submission
+        const cleanName = formData.name.trim();
+        const cleanEmail = formData.email.trim().toLowerCase();
+        const cleanPhone = formData.phone.trim();
+        const cleanAddress = formData.address.trim();
+
+        // Basic required check
+        if (!cleanName || !cleanEmail || !cleanPhone || !formData.password || !cleanAddress) {
             setError('Please fill in all fields.');
+            return;
+        }
+
+        // Strict Email Validation
+        if (!validateEmail(cleanEmail)) {
+            setError('Please enter a valid email address.');
+            return;
+        }
+
+        // Strict Phone Validation
+        if (!validatePhone(cleanPhone)) {
+            setError('Please enter a valid 10-digit mobile number.');
+            return;
+        }
+
+        // Password length check
+        if (formData.password.length < 6) {
+            setError('Password must be at least 6 characters long.');
             return;
         }
 
         try {
             setError('');
-            await register(formData);
+            await register({
+                ...formData,
+                name: cleanName,
+                email: cleanEmail,
+                phone: cleanPhone,
+                address: cleanAddress
+            });
             // On success, redirect to Dashboard (or Plans)
             navigate('/dashboard');
         } catch (err) {
@@ -102,7 +150,7 @@ const Signup = () => {
                                     name="email"
                                     type="email"
                                     autoComplete="email"
-                                    className="w-full pl-10 pr-4 py-3 bg-[var(--light)] border border-gray-200 rounded-lg focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-green-50 transition outline-none font-medium text-sm"
+                                    className={`w-full pl-10 pr-4 py-3 bg-[var(--light)] border rounded-lg focus:bg-white focus:ring-4 focus:ring-green-50 transition outline-none font-medium text-sm ${formData.email ? (validateEmail(formData.email) ? 'border-green-500 focus:border-green-500' : 'border-red-400 focus:border-red-400') : 'border-gray-200 focus:border-[var(--primary)]'}`}
                                     placeholder="rahul@example.com"
                                     value={formData.email}
                                     onChange={handleChange}
@@ -118,7 +166,7 @@ const Signup = () => {
                                     name="phone"
                                     type="text"
                                     autoComplete="tel"
-                                    className="w-full pl-10 pr-4 py-3 bg-[var(--light)] border border-gray-200 rounded-lg focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-green-50 transition outline-none font-medium text-sm"
+                                    className={`w-full pl-10 pr-4 py-3 bg-[var(--light)] border rounded-lg focus:bg-white focus:ring-4 focus:ring-green-50 transition outline-none font-medium text-sm ${formData.phone ? (validatePhone(formData.phone) ? 'border-green-500 focus:border-green-500' : 'border-red-400 focus:border-red-400') : 'border-gray-200 focus:border-[var(--primary)]'}`}
                                     placeholder="9990000000"
                                     value={formData.phone}
                                     onChange={handleChange}

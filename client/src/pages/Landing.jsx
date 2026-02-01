@@ -117,18 +117,14 @@ const Landing = () => {
         loadAll();
     }, [api]);
 
-    const handleSubscribe = async (plan) => {
+    const handleSubscribe = (plan) => {
         if (!user) {
             navigate('/signup');
             return;
         }
-        try {
-            await api.post('/subscription', { planId: plan._id });
-            navigate('/dashboard');
-        } catch (error) {
-            console.error(error);
-            alert("Failed to subscribe. " + (error.response?.data?.message || ""));
-        }
+        // Remove non-serializable icon before passing state to avoid DataCloneError
+        const { icon, ...serializablePlan } = plan;
+        navigate('/checkout', { state: { plan: serializablePlan } });
     };
 
     const testimonials = [
@@ -149,15 +145,15 @@ const Landing = () => {
 
             {/* Hero Section - Redesigned */}
             <header className="container py-10 md:py-24 animate-fade-in flex flex-col-reverse md:flex-row items-center gap-12 relative">
-                {/* Floating BG Blobs - Strengthened */}
-                <div className="bg-blob w-96 h-96 bg-yellow-400 rounded-full top-0 -left-20 animate-float opacity-40"></div>
-                <div className="bg-blob w-80 h-80 bg-green-300 rounded-full bottom-0 right-0 animate-float opacity-40" style={{ animationDelay: '2s' }}></div>
+                {/* Floating BG Blobs - Strengthened - Hidden on mobile for performance and clarity */}
+                <div className="hidden lg:block bg-blob w-96 h-96 bg-yellow-400 rounded-full top-0 -left-20 animate-float opacity-40"></div>
+                <div className="hidden lg:block bg-blob w-80 h-80 bg-green-300 rounded-full bottom-0 right-0 animate-float opacity-40" style={{ animationDelay: '2s' }}></div>
 
                 <div className="flex-1 text-center md:text-left z-10">
                     <div className="inline-block bg-white/90 backdrop-blur-md border border-green-200 text-[var(--primary)] px-6 py-2 rounded-full text-sm font-bold mb-8 tracking-wide shadow-md transform hover:scale-105 transition cursor-default">
                         🚀 #1 daily meal brand in Varanasi
                     </div>
-                    <h1 className="text-5xl md:text-7xl mb-6 leading-tight font-extrabold text-[var(--primary-dark)]">
+                    <h1 className="text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight font-extrabold text-[var(--primary-dark)]">
                         Authentic <br />
                         <span className="text-gradient">Ghar Ka Khana</span>,<br /> Daily.
                     </h1>
@@ -178,13 +174,13 @@ const Landing = () => {
                                 <div className="w-10 h-10 rounded-full bg-gray-300 border-2 border-white shadow-sm"></div>
                                 <div className="w-10 h-10 rounded-full bg-gray-400 border-2 border-white shadow-sm"></div>
                             </div>
-                            <span className="text-sm font-bold text-[var(--primary)]">500+ Happy Eaters</span>
+                            <span className="text-sm font-bold text-[var(--primary)]">100+ Happy Eaters</span>
                         </div>
                     </div>
                 </div>
                 <div className="flex-1 relative">
-                    <div className="relative z-10 w-full max-w-lg mx-auto transform hover:scale-[1.02] transition duration-500 hover:rotate-1">
-                        <img src="/src/assets/hero_tiffin.png" alt="Delicious Tiffin" className="rounded-[2rem] shadow-2xl border-4 border-white/50" />
+                    <div className="relative z-10 w-full max-w-lg mx-auto transform hover:scale-[1.02] transition duration-500 hover:rotate-1 px-4 md:px-0">
+                        <img src="/src/assets/hero_tiffin.png" alt="Delicious Tiffin" className="rounded-[2rem] shadow-2xl border-4 border-white/50 w-full" />
 
                         {/* Floating Badge */}
                         <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 animate-bounce" style={{ animationDuration: '3s' }}>
@@ -336,7 +332,7 @@ const Landing = () => {
                 <div className="container">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl mb-4">More Than Just A Tiffin 🚀</h2>
-                        <p className="text-gray-600 max-w-2xl mx-auto">We don't just deliver food; we deliver an experience. Here is why 500+ bachelors trust us.</p>
+                        <p className="text-gray-600 max-w-2xl mx-auto">We don't just deliver food; we deliver an experience. Here is why 100+ bachelors trust us.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -521,7 +517,7 @@ const Landing = () => {
                         ))}
                     </div>
                     <div className="text-center mt-8 text-gray-500 text-sm">
-                        Still have questions? <a href="#" className="text-[var(--primary)] font-bold hover:underline">Chat with us on WhatsApp</a>
+                        Still have questions? <a href="https://wa.me/917307191299?text=Hi!%20I%20have%20a%20question%20about%20your%20tiffin%20service." target="_blank" rel="noopener noreferrer" className="text-[var(--primary)] font-bold hover:underline">Chat with us on WhatsApp</a>
                     </div>
                 </div>
             </section>
@@ -543,7 +539,7 @@ const Landing = () => {
                     <div>
                         <h4 className="text-white mb-4">Contact</h4>
                         <ul className="space-y-2 opacity-70 text-sm">
-                            <li>+91 73071 91299</li>
+                            <li><a href="tel:+917307191299" className="hover:text-[var(--secondary)] transition">+91 73071 91299</a></li>
                             <li>reachus@thebachelorskitchens.com</li>
                             <li>Kabir Nagar, Durgakund, Lanka, Varanasi, Uttar Pradesh</li>
                         </ul>

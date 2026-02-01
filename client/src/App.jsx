@@ -8,6 +8,7 @@ import CancellationPolicy from './pages/CancellationPolicy';
 import AdminRoute from './components/AdminRoute';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import Checkout from './pages/Checkout';
 
 
 
@@ -21,6 +22,7 @@ function App() {
       <Route path="/about-us" element={<AboutUs />} />
       <Route path="/cancellation-policy" element={<CancellationPolicy />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/checkout" element={<Checkout />} />
       <Route path="/admin" element={
         <AdminRoute>
           <AdminDashboard />

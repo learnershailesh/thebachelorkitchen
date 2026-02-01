@@ -299,7 +299,7 @@ const CancellationPolicy = () => {
                     <h3 className="text-3xl font-bold mb-4">Have Questions About Our Policy?</h3>
                     <p className="text-xl mb-6 opacity-90">Our customer support team is here to help</p>
                     <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
-                        <a href="tel:+919999000000" className="text-lg font-bold hover:underline">
+                        <a href="tel:+917307191299" className="text-lg font-bold hover:underline">
                             📞 +91 73071 91299
                         </a>
                         <span className="hidden md:inline">|</span>
@@ -328,7 +328,7 @@ const CancellationPolicy = () => {
                     <div>
                         <h4 className="text-white mb-4 font-bold">Contact</h4>
                         <ul className="space-y-2 opacity-70 text-sm">
-                            <li>+91 73071 91299</li>
+                            <li><a href="tel:+917307191299" className="hover:text-[var(--secondary)] transition">+91 73071 91299</a></li>
                             <li>reachus@thebachelorskitchens.com</li>
                             <li>Varanasi, Uttar Pradesh</li>
                         </ul>

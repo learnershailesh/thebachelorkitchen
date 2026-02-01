@@ -13,8 +13,21 @@ const subscriptionSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['active', 'expired', 'cancelled'],
+        enum: ['active', 'expired', 'cancelled', 'pending_approval'],
         default: 'active'
+    },
+    paymentMethod: {
+        type: String,
+        enum: ['razorpay', 'upi', 'cash'],
+        default: 'razorpay'
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'completed', 'failed'],
+        default: 'completed' // Default to completed for internal/razorpay for now
+    },
+    transactionId: {
+        type: String
     },
     startDate: {
         type: Date,

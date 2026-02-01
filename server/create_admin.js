@@ -19,12 +19,14 @@ const createAdmin = async () => {
             user.password = hashedPassword;
             user.role = 'admin';
             user.name = user.name || 'Admin User';
+            user.email = user.email || 'admin@thebachelorskitchens.com';
             await user.save();
             console.log('Admin user updated successfully.');
         } else {
             await User.create({
                 name: 'Admin User',
                 phone: phone,
+                email: 'admin@thebachelorskitchens.com',
                 password: hashedPassword,
                 role: 'admin',
                 address: 'Admin HQ'

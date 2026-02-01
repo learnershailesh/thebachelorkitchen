@@ -15,24 +15,44 @@ const addDaysDate = (date, days) => {
 // @route   POST /api/subscription
 // @access  Private
 const createSubscription = asyncHandler(async (req, res) => {
-    const { planId, startDate } = req.body;
+    const { planId, startDate, paymentMethod, transactionId } = req.body;
 
     if (!planId) {
         res.status(400);
         throw new Error('Please select a plan');
     }
 
-    // Default 30 days logic
+    const plan = await Plan.findById(planId);
+    if (!plan) {
+        res.status(404);
+        throw new Error('Plan not found');
+    }
+
+    // Use duration from plan or default to 30
+    const duration = plan.durationDays || 30;
+
     const start = startDate ? new Date(startDate) : new Date();
-    const end = addDaysDate(start, 30);
+    const end = addDaysDate(start, duration);
+
+    const isUPI = paymentMethod === 'upi';
 
     const subscription = await Subscription.create({
         userId: req.user.id,
         planId,
         startDate: start,
         endDate: end,
-        status: 'active'
+        status: isUPI ? 'pending_approval' : 'active',
+        paymentMethod: paymentMethod || 'razorpay',
+        paymentStatus: isUPI ? 'pending' : 'completed',
+        transactionId: transactionId || null
     });
+
+    if (isUPI) {
+        await Notification.create({
+            message: `New UPI Payment from ${req.user.name} for planID: ${planId}. Transaction ID: ${transactionId}`,
+            type: 'order'
+        });
+    }
 
     res.status(201).json(subscription);
 });
@@ -296,10 +316,39 @@ const pauseSubscription = asyncHandler(async (req, res) => {
     throw new Error('Pause subscription service not implemented yet.');
 });
 
+// @desc    Get all subscriptions (Admin)
+// @route   GET /api/subscription/admin/all
+// @access  Private/Admin
+const getAllSubscriptions = asyncHandler(async (req, res) => {
+    const subscriptions = await Subscription.find({}).populate('userId', 'name email phone').populate('planId');
+    res.json(subscriptions);
+});
+
+// @desc    Verify/Approve subscription (Admin)
+// @route   PUT /api/subscription/verify/:id
+// @access  Private/Admin
+const verifySubscription = asyncHandler(async (req, res) => {
+    const { status, paymentStatus } = req.body; // active or cancelled
+
+    const subscription = await Subscription.findById(req.params.id);
+
+    if (subscription) {
+        subscription.status = status || subscription.status;
+        subscription.paymentStatus = paymentStatus || subscription.paymentStatus;
+        const updatedSubscription = await subscription.save();
+        res.json(updatedSubscription);
+    } else {
+        res.status(404);
+        throw new Error('Subscription not found');
+    }
+});
+
 module.exports = {
     createSubscription,
     getMySubscription,
     skipMeal,
     unskipMeal,
-    pauseSubscription
+    pauseSubscription,
+    getAllSubscriptions,
+    verifySubscription
 };

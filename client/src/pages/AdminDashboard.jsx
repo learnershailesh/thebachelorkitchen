@@ -25,6 +25,7 @@ const AdminDashboard = () => {
     // Customer & Notification Data
     const [customers, setCustomers] = useState([]);
     const [notifications, setNotifications] = useState([]);
+    const [subscriptions, setSubscriptions] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
@@ -51,6 +52,8 @@ const AdminDashboard = () => {
             api.get('/admin/users').then(res => setCustomers(res.data));
         } else if (activeTab === 'notifications') {
             api.get('/admin/notifications').then(res => setNotifications(res.data));
+        } else if (activeTab === 'subscriptions') {
+            api.get('/subscription/admin/all').then(res => setSubscriptions(res.data));
         }
     }, [activeTab, api]);
 
@@ -116,6 +119,18 @@ const AdminDashboard = () => {
         ));
     };
 
+    const handleVerifySubscription = async (id, status, paymentStatus) => {
+        try {
+            await api.put(`/subscription/verify/${id}`, { status, paymentStatus });
+            // Refresh list
+            const res = await api.get('/subscription/admin/all');
+            setSubscriptions(res.data);
+            alert(`Subscription ${status === 'active' ? 'Approved' : 'Rejected'}!`);
+        } catch (error) {
+            alert('Failed to verify subscription');
+        }
+    };
+
     if (loading) return <div className="p-10 text-center">Loading Admin Dashboard...</div>;
 
     return (
@@ -131,30 +146,30 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="card flex items-center gap-4 border border-blue-100 shadow-sm">
-                        <div className="p-3 bg-blue-100 text-blue-600 rounded-full"><Users size={24} /></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div className="card flex items-center gap-4 border border-blue-100 shadow-sm p-6">
+                        <div className="p-3 bg-blue-100 text-blue-600 rounded-full shrink-0"><Users size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.totalUsers}</div>
                             <div className="text-sm text-gray-500">Total Users</div>
                         </div>
                     </div>
-                    <div className="card flex items-center gap-4 border border-green-100 shadow-sm">
-                        <div className="p-3 bg-green-100 text-green-600 rounded-full"><CheckSquare size={24} /></div>
+                    <div className="card flex items-center gap-4 border border-green-100 shadow-sm p-6">
+                        <div className="p-3 bg-green-100 text-green-600 rounded-full shrink-0"><CheckSquare size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.activeSubscription}</div>
                             <div className="text-sm text-gray-500">Active Subs</div>
                         </div>
                     </div>
-                    <div className="card flex items-center gap-4 border border-orange-100 shadow-sm">
-                        <div className="p-3 bg-orange-100 text-orange-600 rounded-full"><Truck size={24} /></div>
+                    <div className="card flex items-center gap-4 border border-orange-100 shadow-sm p-6">
+                        <div className="p-3 bg-orange-100 text-orange-600 rounded-full shrink-0"><Truck size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.deliveriesToday}</div>
                             <div className="text-sm text-gray-500">Today's Deliveries</div>
                         </div>
                     </div>
-                    <div className="card flex items-center gap-4 border border-red-100 shadow-sm">
-                        <div className="p-3 bg-red-100 text-red-600 rounded-full"><Utensils size={24} /></div>
+                    <div className="card flex items-center gap-4 border border-red-100 shadow-sm p-6">
+                        <div className="p-3 bg-red-100 text-red-600 rounded-full shrink-0"><Utensils size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.skippedToday}</div>
                             <div className="text-sm text-gray-500">Skipped Today</div>
@@ -193,6 +208,12 @@ const AdminDashboard = () => {
                         className={`pb-3 px-2 font-medium transition whitespace-nowrap ${activeTab === 'videos' ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-gray-500'}`}
                     >
                         <div className="flex items-center gap-2"><Video size={18} /> Gallery</div>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('subscriptions')}
+                        className={`pb-3 px-2 font-medium transition whitespace-nowrap ${activeTab === 'subscriptions' ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-gray-500'}`}
+                    >
+                        <div className="flex items-center gap-2"><CheckCircle size={18} /> Subscriptions</div>
                     </button>
                 </div>
 
@@ -416,6 +437,86 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
                             )) : <div className="text-center text-gray-400 py-10">No new notifications.</div>}
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'subscriptions' && (
+                    <div className="card p-0 overflow-hidden shadow-sm">
+                        <div className="p-6 border-b border-gray-100 bg-white">
+                            <h3 className="mb-0">Subscription Management</h3>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
+                                    <tr>
+                                        <th className="p-4">Customer</th>
+                                        <th className="p-4">Plan</th>
+                                        <th className="p-4">Payment</th>
+                                        <th className="p-4">Transaction ID</th>
+                                        <th className="p-4">Status</th>
+                                        <th className="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white">
+                                    {subscriptions.length === 0 ? (
+                                        <tr><td colSpan="6" className="p-8 text-center text-gray-500">No subscriptions found.</td></tr>
+                                    ) : (
+                                        subscriptions
+                                            .sort((a, b) => (a.status === 'pending_approval' ? -1 : 1))
+                                            .map((sub) => (
+                                                <tr key={sub._id} className={`border-b border-gray-50 hover:bg-gray-50 ${sub.status === 'pending_approval' ? 'bg-blue-50/30' : ''}`}>
+                                                    <td className="p-4">
+                                                        <div className="font-bold text-gray-800">{sub.userId?.name}</div>
+                                                        <div className="text-xs text-gray-400">{sub.userId?.phone}</div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="text-sm font-medium">{sub.planId?.name}</div>
+                                                        <div className="text-xs text-gray-400">Total: ₹{sub.planId?.price}</div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className="text-xs font-bold uppercase px-2 py-1 bg-gray-100 rounded text-gray-600">
+                                                            {sub.paymentMethod}
+                                                        </span>
+                                                        <div className={`text-xs mt-1 ${sub.paymentStatus === 'completed' ? 'text-green-600' : 'text-orange-600'}`}>
+                                                            {sub.paymentStatus}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 font-mono text-xs text-blue-600">
+                                                        {sub.transactionId || 'N/A'}
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest 
+                                                            ${sub.status === 'active' ? 'bg-green-100 text-green-700' :
+                                                                sub.status === 'pending_approval' ? 'bg-orange-100 text-orange-700' :
+                                                                    'bg-red-100 text-red-700'}`}>
+                                                            {sub.status.replace('_', ' ')}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-right">
+                                                        {sub.status === 'pending_approval' && (
+                                                            <div className="flex justify-end gap-2">
+                                                                <button
+                                                                    onClick={() => handleVerifySubscription(sub._id, 'active', 'completed')}
+                                                                    className="px-3 py-1 bg-green-500 text-white rounded text-xs font-bold hover:bg-green-600"
+                                                                >
+                                                                    Approve
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleVerifySubscription(sub._id, 'cancelled', 'failed')}
+                                                                    className="px-3 py-1 bg-red-50 text-red-500 rounded text-xs font-bold hover:bg-red-100"
+                                                                >
+                                                                    Reject
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                        {sub.status === 'active' && <span className="text-green-600 font-bold text-xs">Verified ✓</span>}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 )}

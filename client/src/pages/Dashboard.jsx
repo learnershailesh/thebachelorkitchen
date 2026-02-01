@@ -150,6 +150,54 @@ const Dashboard = () => {
         );
     }
 
+    // PENDING APPROVAL STATE
+    if (subscription.status === 'pending_approval') {
+        return (
+            <div className="min-h-screen pb-20 bg-gray-50">
+                <Navbar />
+                <div className="container py-20 text-center">
+                    <h1 className="text-4xl mb-6 font-bold text-gray-800">{getGreeting()}, {user.name.split(' ')[0]}! 🌤️</h1>
+                    <div className="card max-w-2xl mx-auto bg-white border-0 shadow-2xl rounded-[2.5rem] p-10">
+                        <div className="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-8 text-blue-500 relative">
+                            <Clock size={48} />
+                            <div className="absolute top-0 right-0 w-8 h-8 bg-white rounded-full shadow-sm flex items-center justify-center">
+                                <ShieldCheck size={18} className="text-[var(--primary)]" />
+                            </div>
+                        </div>
+                        <h2 className="text-3xl mb-4 font-extrabold text-gray-800">Payment Verification Pending</h2>
+                        <p className="text-gray-500 mb-8 text-lg leading-relaxed max-w-md mx-auto">
+                            We've received your <span className="text-[var(--primary)] font-bold">{subscription.paymentMethod?.toUpperCase()}</span> payment request.
+                            Our team is verifying the transaction. Your healthy meals will start soon!
+                        </p>
+
+                        <div className="bg-blue-50/50 rounded-2xl p-6 border border-blue-100 mb-10 text-left">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-2 bg-white rounded-lg shadow-sm">
+                                    <Info className="text-blue-500" size={18} />
+                                </div>
+                                <span className="font-bold text-blue-900">What's next?</span>
+                            </div>
+                            <ul className="space-y-3 text-sm text-blue-800">
+                                <li className="flex gap-2"><span>-</span> Verification takes 2-4 hours during business hours.</li>
+                                <li className="flex gap-2"><span>-</span> Once approved, your plan will show up here.</li>
+                                <li className="flex gap-2"><span>-</span> You can then start skipping meals and managing your menu.</li>
+                            </ul>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <button className="flex-1 py-4 bg-[var(--primary)] text-white font-black rounded-2xl shadow-lg shadow-green-200">
+                                Contact Support
+                            </button>
+                            <button onClick={() => window.location.reload()} className="flex-1 py-4 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-50">
+                                Refresh Status
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     // HAS PLAN STATE
     const validUntil = new Date(subscription.endDate);
     const planName = subscription.planId?.name || 'Custom Plan';
@@ -178,7 +226,7 @@ const Dashboard = () => {
                 <div className="container">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-1">{getGreeting()}, {user.name.split(' ')[0]}! 🌤️</h1>
+                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">{getGreeting()}, {user.name.split(' ')[0]}! 🌤️</h1>
                             <p className="text-gray-500 text-sm">Welcome back to your food dashboard.</p>
                         </div>
 
@@ -206,7 +254,7 @@ const Dashboard = () => {
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Current Plan</h3>
-                                <div className="text-xl font-bold text-gray-800">{planName}</div>
+                                <div className="text-lg sm:text-xl font-bold text-gray-800">{planName}</div>
                             </div>
                             <div className="text-right">
                                 <div className="text-2xl font-bold text-[var(--primary)]">{daysLeft}</div>

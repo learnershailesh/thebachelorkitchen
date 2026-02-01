@@ -207,11 +207,11 @@ const AboutUs = () => {
 
                     <div className="grid md:grid-cols-4 gap-8 text-center">
                         <div>
-                            <div className="text-5xl font-extrabold mb-2">500+</div>
+                            <div className="text-5xl font-extrabold mb-2">100+</div>
                             <div className="text-lg opacity-90">Happy Customers</div>
                         </div>
                         <div>
-                            <div className="text-5xl font-extrabold mb-2">15K+</div>
+                            <div className="text-5xl font-extrabold mb-2">5K+</div>
                             <div className="text-lg opacity-90">Meals Delivered Monthly</div>
                         </div>
                         <div>
@@ -260,7 +260,7 @@ const AboutUs = () => {
                     <div>
                         <h4 className="text-white mb-4 font-bold">Contact</h4>
                         <ul className="space-y-2 opacity-70 text-sm">
-                            <li>+91 73071 91299</li>
+                            <li><a href="tel:+917307191299" className="hover:text-[var(--secondary)] transition">+91 73071 91299</a></li>
                             <li>reachus@thebachelorskitchens.com</li>
                             <li>Varanasi, Uttar Pradesh</li>
                         </ul>
