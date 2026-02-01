@@ -227,6 +227,12 @@ const verifyEmailOTP = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Email and OTP are required');
     }
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
 
     // Brute-force protection
     if (user.otpLockedUntil && user.otpLockedUntil > new Date()) {

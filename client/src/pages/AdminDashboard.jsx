@@ -42,18 +42,19 @@ const AdminDashboard = () => {
         fetchInitialData();
     }, [api]);
 
-    // Fetch tab specific data
     useEffect(() => {
+        const wrapData = (res) => Array.isArray(res.data) ? res.data : [];
+        
         if (activeTab === 'deliveries') {
-            api.get('/admin/deliveries').then(res => setDeliveries(res.data));
+            api.get('/admin/deliveries').then(res => setDeliveries(wrapData(res))).catch(() => setDeliveries([]));
         } else if (activeTab === 'videos') {
-            api.get('/admin/videos').then(res => setVideos(res.data));
+            api.get('/admin/videos').then(res => setVideos(wrapData(res))).catch(() => setVideos([]));
         } else if (activeTab === 'customers') {
-            api.get('/admin/users').then(res => setCustomers(res.data));
+            api.get('/admin/users').then(res => setCustomers(wrapData(res))).catch(() => setCustomers([]));
         } else if (activeTab === 'notifications') {
-            api.get('/admin/notifications').then(res => setNotifications(res.data));
+            api.get('/admin/notifications').then(res => setNotifications(wrapData(res))).catch(() => setNotifications([]));
         } else if (activeTab === 'subscriptions') {
-            api.get('/subscription/admin/all').then(res => setSubscriptions(res.data));
+            api.get('/subscription/admin/all').then(res => setSubscriptions(wrapData(res))).catch(() => setSubscriptions([]));
         }
     }, [activeTab, api]);
 
@@ -114,9 +115,9 @@ const AdminDashboard = () => {
     };
 
     const handleMarkDelivered = (id) => {
-        setDeliveries(prev => prev.map(item =>
+        setDeliveries(prev => Array.isArray(prev) ? prev.map(item =>
             item.id === id ? { ...item, status: 'Delivered' } : item
-        ));
+        ) : []);
     };
 
     const handleVerifySubscription = async (id, status, paymentStatus) => {
@@ -235,9 +236,9 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white">
-                                    {deliveries.length === 0 ? (
+                                    {Array.isArray(deliveries) && deliveries.length === 0 ? (
                                         <tr><td colSpan="5" className="p-8 text-center text-gray-500">No deliveries scheduled.</td></tr>
-                                    ) : (
+                                    ) : Array.isArray(deliveries) ? (
                                         deliveries.map((item) => (
                                             <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50">
                                                 <td className="p-4 font-medium">{item.name}<div className="text-xs text-gray-400">{item.phone}</div></td>
@@ -260,7 +261,7 @@ const AdminDashboard = () => {
                                                 </td>
                                             </tr>
                                         ))
-                                    )}
+                                    ) : null}
                                 </tbody>
                             </table>
                         </div>
@@ -347,8 +348,8 @@ const AdminDashboard = () => {
 
                         {/* Video List */}
                         <div className="space-y-4">
-                            <h3 className="font-bold text-gray-700">Gallery ({videos.length})</h3>
-                            {videos.map(video => (
+                            <h3 className="font-bold text-gray-700">Gallery ({Array.isArray(videos) ? videos.length : 0})</h3>
+                            {Array.isArray(videos) && videos.map(video => (
                                 <div key={video._id} className="card p-4 flex gap-4 items-start shadow-sm border border-gray-100">
                                     <div className="w-32 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 overflow-hidden relative">
                                         <div className="absolute inset-0 bg-black/10"></div>
@@ -400,8 +401,8 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white">
-                                    {customers
-                                        .filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.phone.includes(searchTerm))
+                                    {Array.isArray(customers) && customers
+                                        .filter(c => (c.name?.toLowerCase().includes(searchTerm.toLowerCase())) || (c.phone?.includes(searchTerm)))
                                         .map((customer) => (
                                             <tr key={customer._id} className="border-b border-gray-50 hover:bg-gray-50">
                                                 <td className="p-4 font-bold text-gray-700">{customer.name}</td>
@@ -426,7 +427,7 @@ const AdminDashboard = () => {
                     <div className="card max-w-3xl mx-auto shadow-sm">
                         <h3 className="mb-6 flex items-center gap-2"><Bell size={20} className="text-red-500" /> Recent Updates</h3>
                         <div className="space-y-4">
-                            {notifications.length > 0 ? notifications.map((notif) => (
+                            {Array.isArray(notifications) && notifications.length > 0 ? notifications.map((notif) => (
                                 <div key={notif._id} className="p-4 rounded-xl bg-gray-50 border border-gray-100 flex gap-4 items-start animate-fade-in">
                                     <div className={`p-2 rounded-full ${notif.type === 'address' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
                                         {notif.type === 'address' ? <Truck size={18} /> : <CheckCircle size={18} />}
@@ -459,9 +460,9 @@ const AdminDashboard = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white">
-                                    {subscriptions.length === 0 ? (
+                                    {Array.isArray(subscriptions) && subscriptions.length === 0 ? (
                                         <tr><td colSpan="6" className="p-8 text-center text-gray-500">No subscriptions found.</td></tr>
-                                    ) : (
+                                    ) : Array.isArray(subscriptions) ? (
                                         subscriptions
                                             .sort((a, b) => (a.status === 'pending_approval' ? -1 : 1))
                                             .map((sub) => (
@@ -514,7 +515,7 @@ const AdminDashboard = () => {
                                                     </td>
                                                 </tr>
                                             ))
-                                    )}
+                                    ) : null}
                                 </tbody>
                             </table>
                         </div>

@@ -3,6 +3,7 @@ import { CheckCircle, Clock, Calendar, Star, Leaf, Flame, Play, Quote, ChevronRi
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import heroTiffin from '../assets/hero_tiffin.png';
 
 const Landing = () => {
     // Accordion State
@@ -56,12 +57,16 @@ const Landing = () => {
                 // Use api instance or axios. Use api for consistency if available
                 // If api instance adds token, it's fine for public route too usually
                 const { data } = await api.get('/plans');
-                const mergedPlans = data.map(p => ({
-                    ...p,
-                    ...planMetadata[p.name],
-                    priceDisplay: `₹${p.price.toLocaleString()}`
-                }));
-                setPlans(mergedPlans);
+                if (Array.isArray(data)) {
+                    const mergedPlans = data.map(p => ({
+                        ...p,
+                        ...planMetadata[p.name],
+                        priceDisplay: `₹${p.price.toLocaleString()}`
+                    }));
+                    setPlans(mergedPlans);
+                } else {
+                    throw new Error('Plans data is not an array');
+                }
             } catch (error) {
                 console.error("Failed to fetch plans", error);
                 // Fallback to hardcoded if API fails (optional, but good for stability during dev)
@@ -97,9 +102,15 @@ const Landing = () => {
         const fetchVideos = async () => {
             try {
                 const { data } = await api.get('/admin/videos');
-                setVideos(data);
+                if (Array.isArray(data)) {
+                    setVideos(data);
+                } else {
+                    console.error("Videos data is not an array:", data);
+                    setVideos([]);
+                }
             } catch (error) {
                 console.error("Failed to fetch videos", error);
+                setVideos([]);
             }
         };
 
@@ -180,7 +191,7 @@ const Landing = () => {
                 </div>
                 <div className="flex-1 relative">
                     <div className="relative z-10 w-full max-w-lg mx-auto transform hover:scale-[1.02] transition duration-500 hover:rotate-1 px-4 md:px-0">
-                        <img src="/src/assets/hero_tiffin.png" alt="Delicious Tiffin" className="rounded-[2rem] shadow-2xl border-4 border-white/50 w-full" />
+                        <img src={heroTiffin} alt="Delicious Tiffin" className="rounded-[2rem] shadow-2xl border-4 border-white/50 w-full" />
 
                         {/* Floating Badge */}
                         <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 animate-bounce" style={{ animationDuration: '3s' }}>
@@ -263,8 +274,8 @@ const Landing = () => {
 
                     {/* Reels Style Grid - Cinematic */}
                     <div className="flex gap-8 overflow-x-auto pb-12 snap-x snap-mandatory justify-start md:justify-center scrollbar-hide px-4">
-                        {videos.length > 0 ? (
-                            videos.map((video) => {
+                    {Array.isArray(videos) && videos.length > 0 ? (
+                        videos.map((video) => {
                                 // Helper to convert standard YouTube URL to Embed URL
                                 const getEmbedUrl = (url) => {
                                     if (!url) return '';

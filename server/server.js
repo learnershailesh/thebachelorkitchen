@@ -21,8 +21,15 @@ const limiter = rateLimit({
 // Middleware
 app.use(limiter);
 app.use(helmet());
+
+// Parse ALLOWED_ORIGINS from environment variable (comma-separated)
+// If not set, defaults to localhost for local development
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+    : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001'];
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL || '*',
+    origin: allowedOrigins,
     credentials: true
 }));
 app.use(express.json());
@@ -40,6 +47,10 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/subscription', require('./routes/subscription'));
 app.use('/api/plans', require('./routes/plans'));
 app.use('/api/admin', require('./routes/admin'));
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
 
 app.get('/', (req, res) => {
     res.send('API is running...');

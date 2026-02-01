@@ -34,7 +34,10 @@ const Dashboard = () => {
 
                 const { data } = await api.get(`/admin/menu?date=${today}`);
                 if (data && data.items) {
-                    setMenuData(data.items);
+                    setMenuData({
+                        lunch: Array.isArray(data.items.lunch) ? data.items.lunch : [],
+                        dinner: Array.isArray(data.items.dinner) ? data.items.dinner : []
+                    });
                 }
             } catch (error) {
                 console.log("No menu found");
@@ -309,11 +312,15 @@ const Dashboard = () => {
                             <div className="space-y-3">
                                 <div className="bg-white/60 p-3 rounded-xl">
                                     <div className="text-xs text-orange-600 font-bold mb-1 uppercase">Lunch</div>
-                                    <div className="text-sm font-medium text-gray-800 line-clamp-1">{menuData.lunch.join(', ')}</div>
+                                    <div className="text-sm font-medium text-gray-800 line-clamp-1">
+                                        {Array.isArray(menuData.lunch) ? menuData.lunch.join(', ') : 'Lunch Menu Not Available'}
+                                    </div>
                                 </div>
                                 <div className="bg-white/60 p-3 rounded-xl">
                                     <div className="text-xs text-orange-600 font-bold mb-1 uppercase">Dinner</div>
-                                    <div className="text-sm font-medium text-gray-800 line-clamp-1">{menuData.dinner.join(', ')}</div>
+                                    <div className="text-sm font-medium text-gray-800 line-clamp-1">
+                                        {Array.isArray(menuData.dinner) ? menuData.dinner.join(', ') : 'Dinner Menu Not Available'}
+                                    </div>
                                 </div>
                             </div>
                         ) : (
