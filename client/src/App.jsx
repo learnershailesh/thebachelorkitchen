@@ -6,6 +6,7 @@ import AboutUs from './pages/AboutUs';
 import CancellationPolicy from './pages/CancellationPolicy';
 
 import AdminRoute from './components/AdminRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import Checkout from './pages/Checkout';
@@ -21,8 +22,16 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/about-us" element={<AboutUs />} />
       <Route path="/cancellation-policy" element={<CancellationPolicy />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/checkout" element={
+        <ProtectedRoute>
+          <Checkout />
+        </ProtectedRoute>
+      } />
       <Route path="/admin" element={
         <AdminRoute>
           <AdminDashboard />

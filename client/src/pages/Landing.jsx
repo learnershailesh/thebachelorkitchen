@@ -1,5 +1,5 @@
 import Navbar from '../components/Navbar';
-import { CheckCircle, Clock, Calendar, Star, Leaf, Flame, Play, Quote, ChevronRight, ChevronDown, Smartphone, ShieldCheck, Sprout, Instagram, Youtube, Linkedin, Twitter } from 'lucide-react';
+import { CheckCircle, Clock, Calendar, Star, Leaf, Flame, Play, Quote, ChevronRight, ChevronDown, Smartphone, ShieldCheck, Sprout, Instagram, Youtube, Linkedin, Twitter, FileText } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
@@ -23,32 +23,38 @@ const Landing = () => {
         "Focus Start Plan": {
             icon: <Flame size={32} className="text-orange-500" />,
             duration: "/ month",
-            recommended: false
+            recommended: false,
+            menuUrl: "/Focus Start Plan final1.pdf"
         },
         "Smart Study Plan": {
             icon: <Star size={32} className="text-yellow-500" />,
             duration: "/ month",
-            recommended: true
+            recommended: true,
+            menuUrl: "/Smart Study Plan.pdf"
         },
         "Peak Performance Plan": {
             icon: <Leaf size={32} className="text-green-500" />,
             duration: "/ month",
-            recommended: false
+            recommended: false,
+            menuUrl: "/Peak Performance Plan.pdf"
         },
         "Focus Start - Trial Pack": {
             icon: <Flame size={32} className="text-orange-400" />,
             duration: "/ 7 days",
-            recommended: false
+            recommended: false,
+            menuUrl: "/Focus Start Plan final1.pdf"
         },
         "Smart Study - Trial Pack": {
             icon: <Star size={32} className="text-yellow-400" />,
             duration: "/ 7 days",
-            recommended: true
+            recommended: true,
+            menuUrl: "/Smart Study Plan.pdf"
         },
         "Peak Performance - Trial Pack": {
             icon: <Leaf size={32} className="text-green-400" />,
             duration: "/ 7 days",
-            recommended: false
+            recommended: false,
+            menuUrl: "/Peak Performance Plan.pdf"
         }
     };
 
@@ -153,8 +159,8 @@ const Landing = () => {
 
     return (
         <div className="min-h-screen bg-white font-sans text-gray-900">
-            <SEO 
-                title="Home - Authentic Tiffin Service" 
+            <SEO
+                title="Home - Authentic Tiffin Service"
                 description="The Bachelor's Kitchens serves freshly cooked, homely meals daily. Perfect subscription plans for students & professionals. Hygienic, tasty, and delivered on time."
             />
             <Navbar />
@@ -279,8 +285,8 @@ const Landing = () => {
 
                     {/* Reels Style Grid - Cinematic */}
                     <div className="flex gap-8 overflow-x-auto pb-12 snap-x snap-mandatory justify-start md:justify-center scrollbar-hide px-4">
-                    {Array.isArray(videos) && videos.length > 0 ? (
-                        videos.map((video) => {
+                        {Array.isArray(videos) && videos.length > 0 ? (
+                            videos.map((video) => {
                                 // Helper to convert standard YouTube URL to Embed URL
                                 const getEmbedUrl = (url) => {
                                     if (!url) return '';
@@ -487,6 +493,18 @@ const Landing = () => {
                                             ))}
                                         </ul>
                                     </div>
+
+                                    {plan.menuUrl && (
+                                        <a
+                                            href={plan.menuUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mb-4 flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-gray-300 text-gray-600 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all font-bold text-sm bg-gray-50/50"
+                                        >
+                                            <FileText size={16} />
+                                            View Menu
+                                        </a>
+                                    )}
 
                                     <button
                                         onClick={() => handleSubscribe(plan)}

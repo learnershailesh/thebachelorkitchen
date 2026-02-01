@@ -189,9 +189,14 @@ const Dashboard = () => {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <button className="flex-1 py-4 bg-[var(--primary)] text-white font-black rounded-2xl shadow-lg shadow-green-200">
+                            <a
+                                href="https://wa.me/917307191299"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 py-4 bg-[var(--primary)] text-white font-black rounded-2xl shadow-lg shadow-green-200 text-center"
+                            >
                                 Contact Support
-                            </button>
+                            </a>
                             <button onClick={() => window.location.reload()} className="flex-1 py-4 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-50">
                                 Refresh Status
                             </button>
@@ -348,10 +353,15 @@ const Dashboard = () => {
                         <span className="font-bold text-gray-700">Days Saved</span>
                     </button>
 
-                    <button className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition whitespace-nowrap ml-auto">
+                    <a
+                        href="https://wa.me/917307191299"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition whitespace-nowrap ml-auto"
+                    >
                         <HelpCircle size={18} className="text-blue-500" />
                         <span className="font-bold text-gray-700">Help & Support</span>
-                    </button>
+                    </a>
                 </div>
 
                 {/* Main Content Area */}
@@ -377,9 +387,14 @@ const Dashboard = () => {
                             <p className="text-gray-500 text-sm leading-relaxed mb-8">
                                 Going on a holiday? You can pause your subscription for up to 7 days. Your plan will be extended automatically.
                             </p>
-                            <button className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold shadow-sm hover:shadow-md transition border border-blue-50">
+                            <a
+                                href="https://wa.me/917307191299"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold shadow-sm hover:shadow-md transition border border-blue-50 block text-center"
+                            >
                                 Contact Support
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

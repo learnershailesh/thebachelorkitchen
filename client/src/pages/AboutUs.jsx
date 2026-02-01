@@ -150,7 +150,7 @@ const AboutUs = () => {
                         {/* Co-Founder 1 */}
                         <div className="text-center group">
                             <div className="w-32 h-32 rounded-full mx-auto mb-4 overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
-                                <img src="/Pradeep.jpeg" alt="Pradeep Kumar" className="w-full h-full object-cover" style={{ objectPosition: 'center 5%', transform: 'scale(1.15)' }} />
+                                <img src="/Pradeep.jpeg" alt="Pradeep Kumar" className="w-full h-full object-cover" style={{ objectPosition: 'center -15%', transform: 'scale(1.15)' }} />
                             </div>
                             <h3 className="text-xl font-bold mb-1">Pradeep Kumar</h3>
                             <p className="text-sm text-[var(--primary)] font-semibold mb-2">Co-Founder</p>
@@ -160,7 +160,7 @@ const AboutUs = () => {
                         {/* Co-Founder 2 */}
                         <div className="text-center group">
                             <div className="w-32 h-32 rounded-full mx-auto mb-4 overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
-                                <img src="/Alok.jpeg" alt="Alok Ranjan" className="w-full h-full object-cover" style={{ objectPosition: 'center 1%', transform: 'scale(1.15)' }} />
+                                <img src="/Alok.jpeg" alt="Alok Ranjan" className="w-full h-full object-cover" style={{ objectPosition: 'center -35%', transform: 'scale(1.20)' }} />
                             </div>
                             <h3 className="text-xl font-bold mb-1">Alok Ranjan</h3>
                             <p className="text-sm text-[var(--primary)] font-semibold mb-2">Co-Founder</p>
@@ -170,9 +170,9 @@ const AboutUs = () => {
                         {/* Co-Founder 3 */}
                         <div className="text-center group">
                             <div className="w-32 h-32 rounded-full mx-auto mb-4 overflow-hidden shadow-lg group-hover:scale-110 transition-transform">
-                                <img src="/Vikas.jpeg" alt="Vikash Rao" className="w-full h-full object-cover" style={{ objectPosition: 'center 2%', transform: 'scale(1.15)' }} />
+                                <img src="/Vikas.jpeg" alt="Vikash Rao" className="w-full h-full object-cover" style={{ objectPosition: 'center -15%', transform: 'scale(1.15)' }} />
                             </div>
-                            <h3 className="text-xl font-bold mb-1">Vikash Rao</h3>
+                            <h3 className="text-xl font-bold mb-1">Vikas Rao</h3>
                             <p className="text-sm text-[var(--primary)] font-semibold mb-2">Co-Founder</p>
                             <p className="text-gray-600 text-sm">Expert in operations and customer satisfaction</p>
                         </div>
