@@ -11,28 +11,30 @@ connectDB();
 
 const app = express();
 
-// Rate Limiting
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per window
-    message: 'Too many requests from this IP, please try again after 15 minutes'
-});
-
-// Middleware
-app.use(limiter);
-app.use(helmet());
-
 // Parse ALLOWED_ORIGINS from environment variable (comma-separated)
 // If not set, defaults to localhost for local development
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
     ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
     : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001'];
 
+
 app.use(cors({
     origin: allowedOrigins,
     credentials: true
 }));
+
 app.use(express.json());
+
+// Rate Limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 300, // Limit each IP to 300 requests per window (Increased from 100)
+    message: 'Too many requests from this IP, please try again after 15 minutes'
+});
+
+// Middleware
+app.use(limiter);
+app.use(helmet());
 
 // Request logging (Minimal for production)
 app.use((req, res, next) => {

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import heroTiffin from '../assets/hero_tiffin.png';
+import SEO from '../components/SEO';
 
 const Landing = () => {
     // Accordion State
@@ -151,7 +152,11 @@ const Landing = () => {
     ];
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-white font-sans text-gray-900">
+            <SEO 
+                title="Home - Authentic Tiffin Service" 
+                description="The Bachelor's Kitchens serves freshly cooked, homely meals daily. Perfect subscription plans for students & professionals. Hygienic, tasty, and delivered on time."
+            />
             <Navbar />
 
             {/* Hero Section - Redesigned */}

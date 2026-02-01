@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import { Users, Truck, CheckSquare, CheckCircle, Utensils, Video, Plus, Trash2, Bell, Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
+import SEO from '../components/SEO';
 
 const AdminDashboard = () => {
     const { api } = useAuth();
@@ -136,6 +137,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="min-h-screen pb-20 bg-gray-50">
+            <SEO title="Admin Dashboard" />
             <Navbar />
 
             <div className="container py-8">

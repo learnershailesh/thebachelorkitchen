@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import SmartCalendar from '../components/SmartCalendar';
 import { format, addDays, isSameDay, setHours, setMinutes, isAfter, differenceInDays } from 'date-fns';
 import { Edit2, MapPin, X, Utensils, UtensilsCrossed, Clock, Calendar, ChevronRight, HelpCircle, Package, AlertCircle } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Dashboard = () => {
     const { user, api, updateProfile } = useAuth();
@@ -222,6 +223,7 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-screen pb-20 bg-gray-50/50">
+            <SEO title="My Dashboard" />
             <Navbar />
 
             {/* Top Section / Header */}

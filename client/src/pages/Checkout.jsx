@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import { ShieldCheck, Copy, Check, ChevronLeft, CreditCard, Smartphone, Info } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const Checkout = () => {
     const location = useLocation();
@@ -21,7 +22,7 @@ const Checkout = () => {
         }
     }, [plan, navigate]);
 
-    const upiId = "7521908477@sb";
+    const upiId = "7521908477@sbi";
 
     const handleCopy = () => {
         navigator.clipboard.writeText(upiId);
@@ -55,6 +56,7 @@ const Checkout = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 pb-20">
+            <SEO title="Checkout - Finalize Your Plan" />
             <Navbar />
 
             <div className="container max-w-4xl py-12">
