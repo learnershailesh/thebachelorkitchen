@@ -73,8 +73,8 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-4">
-            <div className="bg-white rounded-[20px] shadow-2xl overflow-hidden flex w-full max-w-4xl min-h-[600px]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-2 md:p-4">
+            <div className="bg-white rounded-[20px] shadow-2xl overflow-hidden flex w-full max-w-4xl min-h-[500px] md:min-h-[600px]">
 
                 {/* Left Side - Brand & Hero (Hidden on Mobile) */}
                 <div className="hidden md:flex md:w-1/2 p-10 flex-col items-center justify-center bg-[var(--light)] relative overflow-hidden text-center animate-fade-in">
@@ -94,7 +94,7 @@ const Login = () => {
                 </div>
 
                 {/* Right Side - Login Form */}
-                <div className="w-full md:w-1/2 p-10 flex flex-col justify-center bg-white">
+                <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-white">
                     {/* Home Button */}
                     <Link to="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-[var(--primary)] transition-colors mb-6 group w-fit">
                         <Home size={20} className="group-hover:-translate-x-1 transition-transform" />

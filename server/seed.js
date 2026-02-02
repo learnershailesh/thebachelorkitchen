@@ -30,21 +30,21 @@ const seedPlans = async () => {
         },
         {
             name: "Focus Start - Trial Pack",
-            price: 750,
+            price: 850,
             description: "7-Day Trial",
             features: ["Homestyle Comfort Meals", "Freshly Prepared Daily", "Perfect Portion Sizes", "Full focus start benefits"],
             durationDays: 7
         },
         {
             name: "Smart Study - Trial Pack",
-            price: 850,
+            price: 950,
             description: "7-Day Trial",
             features: ["Includes Focus Start Benefits", "Daily Sweet & Savory Sides", "Perfect for busy students"],
             durationDays: 7
         },
         {
             name: "Peak Performance - Trial Pack",
-            price: 950,
+            price: 1050,
             description: "7-Day Trial",
             features: ["High-Protein Power Meals", "Low-Oil & Wholesome", "Premium diet menu"],
             durationDays: 7

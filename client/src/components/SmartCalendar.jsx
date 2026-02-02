@@ -62,11 +62,11 @@ const SmartCalendar = ({ userPlan, onDateClick }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-2 text-center mb-2 font-medium text-gray-400 text-sm">
+            <div className="grid grid-cols-7 gap-1 md:gap-2 text-center mb-2 font-medium text-gray-400 text-xs md:text-sm">
                 <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
             </div>
 
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-7 gap-1 md:gap-2">
                 {calendarDays.map((day) => {
                     const status = getDayStatus(day);
                     const isPast = isBefore(day, today) && !isSameDay(day, today);
@@ -75,35 +75,42 @@ const SmartCalendar = ({ userPlan, onDateClick }) => {
                     let bgClass = "bg-gray-50 hover:bg-gray-100";
                     let textClass = "text-gray-700";
                     let label = "Active";
+                    let shortLabel = "A";
 
                     if (status === 'skipped_all') {
                         bgClass = "bg-red-50 border border-red-200";
                         textClass = "text-red-600";
                         label = "Skipped";
+                        shortLabel = "X";
                     } else if (status === 'skipped_lunch') {
                         bgClass = "bg-yellow-50 border border-yellow-200";
                         textClass = "text-yellow-700";
                         label = "No Lunch";
+                        shortLabel = "L";
                     } else if (status === 'skipped_dinner') {
                         bgClass = "bg-yellow-50 border border-yellow-200";
                         textClass = "text-yellow-700";
                         label = "No Dinner";
+                        shortLabel = "D";
                     } else if (!isPast) {
                         bgClass = "bg-green-50 border border-green-200";
                         textClass = "text-green-700";
+                        label = "Active";
+                        shortLabel = "A";
                     }
 
                     return (
                         <button
                             key={day.toISOString()}
                             onClick={() => onDateClick(day)}
-                            className={`p-2 rounded-xl flex flex-col items-center justify-center min-h-[70px] transition relative overflow-hidden ${bgClass} ${isPast ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}`}
+                            className={`p-1 md:p-2 rounded-lg md:rounded-xl flex flex-col items-center justify-center min-h-[50px] md:min-h-[70px] transition relative overflow-hidden ${bgClass} ${isPast ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}`}
                             disabled={isPast}
                         >
-                            <span className={`text-lg font-bold ${textClass}`}>{format(day, 'd')}</span>
+                            <span className={`text-base md:text-lg font-bold ${textClass}`}>{format(day, 'd')}</span>
                             {!isPast && (
-                                <span className={`text-[10px] uppercase font-bold mt-1 ${textClass}`}>
-                                    {label}
+                                <span className={`text-[8px] md:text-[10px] uppercase font-bold mt-0.5 md:mt-1 ${textClass}`}>
+                                    <span className="hidden md:inline">{label}</span>
+                                    <span className="md:hidden">{shortLabel}</span>
                                 </span>
                             )}
                         </button>

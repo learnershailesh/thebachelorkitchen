@@ -234,8 +234,8 @@ const Dashboard = () => {
             {/* Top Section / Header */}
             <div className="bg-white border-b border-gray-100 pb-8 pt-6">
                 <div className="container">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                        <div className="w-full md:w-auto">
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">{getGreeting()}, {user.name.split(' ')[0]}! 🌤️</h1>
                             <p className="text-gray-500 text-sm">Welcome back to your food dashboard.</p>
                         </div>
@@ -252,9 +252,9 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="container -mt-0 pt-8">
+            <div className="container -mt-0 pt-8 px-4 md:px-0">
                 {/* Key Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
                     {/* 1. Subscription Progress */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">

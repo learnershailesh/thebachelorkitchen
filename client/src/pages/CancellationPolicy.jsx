@@ -24,7 +24,7 @@ const CancellationPolicy = () => {
                 </div>
             </section>
 
-            {/* Quick Summary */}
+            {/* Quick Summary*/}
             <section className="py-12 bg-white border-b border-gray-100">
                 <div className="container">
                     <div className="max-w-4xl mx-auto">

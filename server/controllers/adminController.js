@@ -5,7 +5,7 @@ const Menu = require('../models/Menu');
 const Video = require('../models/Video');
 const Notification = require('../models/Notification');
 
-// @desc    Get All Users with Plan Info
+// @desc    Get All Users with Plan
 // @route   GET /api/admin/users
 // @access  Private/Admin
 const getAllUsers = asyncHandler(async (req, res) => {

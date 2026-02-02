@@ -19,8 +19,11 @@ const AboutUs = () => {
 
                     <h1 className="text-5xl md:text-6xl font-extrabold mb-6 text-green-200">About Us</h1>
                     <p className="text-xl md:text-2xl max-w-3xl opacity-90 leading-relaxed">
-                        We're not just a tiffin service. We're your home away from home, serving authentic,
-                        wholesome meals with love and care.
+                        We’re not just a meal brand.
+                        We’re three friends who missed ghar ka khana
+                        and decided to fix it — for everyone living away from home.
+                        The Bachelor’s Kitchens is about warmth, trust,
+                        and meals that feel like maa ke haathon ka khana.
                     </p>
                 </div>
             </section>
@@ -33,11 +36,31 @@ const AboutUs = () => {
 
                         <div className="space-y-6 text-gray-700 leading-relaxed text-lg">
                             <p className="text-xl md:text-2xl font-semibold text-[var(--primary)] text-center mb-8">
-                                The Bachelor's Kitchens is more than just a food startup—it's a feeling of home for those living away from it.
+                                The Bachelor’s Kitchens is not just a food startup.
+                                It’s built by people who missed ghar ka khana,
+                                and decided to bring it back — for everyone living away from home.
                             </p>
 
                             <p>
-                                Born from the everyday struggles of bachelors, students, and working professionals, we exist to solve one simple problem: <strong>good, homely food should always be accessible.</strong> Long workdays, busy schedules, and empty kitchens often push people toward unhealthy outside food. We wanted to change that.
+                                We started The Bachelor’s Kitchens because we lived this problem ourselves.
+
+                                As bachelors, students, and working professionals,
+                                we knew how hard it gets to manage food after long days, busy schedules,
+                                and empty kitchens.
+
+                                Outside food was easy — but unhealthy, oily, and unreliable.
+                                Ghar ka khana? Sirf yaadon me reh jaata tha.
+
+                                So instead of adjusting, we decided to change it.
+
+                                That’s why we cook fresh meals every single day
+                                and deliver them on a simple subscription model.
+
+                                No grocery tension.
+                                No daily cooking stress.
+                                No compromises on taste or hygiene.
+
+                                Just honest food — cooked with care, and delivered on time
                             </p>
 
                             <p>
@@ -50,10 +73,15 @@ const AboutUs = () => {
                                     🍽️ What makes us special?
                                 </h3>
                                 <p className="mb-4">
-                                    At The Bachelor's Kitchens, you'll find dishes from every corner of India. From comforting North Indian meals to soulful South Indian flavors, from the simplicity of the East to the bold tastes of the West—<strong>each meal is designed to remind you of home, no matter where you are.</strong>
+                                    Meals inspired from every corner of India — North, South, East & West
+                                    <br />
+                                    Food that feels familiar, comforting, and homely
+                                    Cooked with hygiene, balance, and care — every single day
+                                    <strong> each meal is designed to remind you of home, no matter where you are.</strong>
                                 </p>
                                 <p>
-                                    Every dish is cooked with hygiene, balance, and taste in mind—because we believe food should not only fill your stomach, but also comfort your heart.
+                                    Because we believe food shouldn’t just fill your stomach,
+                                    it should comfort your heart
                                 </p>
                             </div>
 
@@ -61,6 +89,7 @@ const AboutUs = () => {
                             <div className="text-center py-8">
                                 <p className="text-xl font-medium text-gray-800 mb-3">
                                     This is not just a subscription meal service.
+                                    It’s a feeling of home, away from home.
                                 </p>
                                 <p className="text-lg text-gray-600 mb-2">
                                     It's for the nights you miss home.
@@ -141,7 +170,9 @@ const AboutUs = () => {
             {/* Team Section */}
             <section className="py-20 bg-white">
                 <div className="container">
-                    <h2 className="text-4xl font-bold text-center mb-4">Meet Our Team 👨‍🍳</h2>
+                    <h2 className="text-4xl font-bold text-center mb-4">Built by People Who Missed Ghar Ka Khana
+
+                        And decided to fix it for everyone else 👨‍🍳</h2>
                     <p className="text-center text-gray-600 mb-16 max-w-2xl mx-auto">
                         The passionate people behind your delicious meals.
                     </p>
@@ -154,7 +185,7 @@ const AboutUs = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-1">Pradeep Kumar</h3>
                             <p className="text-sm text-[var(--primary)] font-semibold mb-2">Co-Founder</p>
-                            <p className="text-gray-600 text-sm">Visionary leader driving our mission forward</p>
+                            <p className="text-gray-600 text-sm">Strategy & Growth Head</p>
                         </div>
 
                         {/* Co-Founder 2 */}
@@ -164,7 +195,7 @@ const AboutUs = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-1">Alok Ranjan</h3>
                             <p className="text-sm text-[var(--primary)] font-semibold mb-2">Co-Founder</p>
-                            <p className="text-gray-600 text-sm">Passionate about delivering quality meals</p>
+                            <p className="text-gray-600 text-sm">Product & Kitchen</p>
                         </div>
 
                         {/* Co-Founder 3 */}
@@ -174,7 +205,8 @@ const AboutUs = () => {
                             </div>
                             <h3 className="text-xl font-bold mb-1">Vikas Rao</h3>
                             <p className="text-sm text-[var(--primary)] font-semibold mb-2">Co-Founder</p>
-                            <p className="text-gray-600 text-sm">Expert in operations and customer satisfaction</p>
+                            <p className="text-gray-600 text-sm">Operations Head
+                                Brand, Marketing & Community Head</p>
                         </div>
 
                         {/* Tech Lead */}

@@ -24,37 +24,37 @@ const Landing = () => {
             icon: <Flame size={32} className="text-orange-500" />,
             duration: "/ month",
             recommended: false,
-            menuUrl: "/Focus Start Plan final1.pdf"
+            menuUrl: "/FocusStartPlan.pdf"
         },
         "Smart Study Plan": {
             icon: <Star size={32} className="text-yellow-500" />,
             duration: "/ month",
             recommended: true,
-            menuUrl: "/Smart Study Plan.pdf"
+            menuUrl: "/SmartStudyPlan.pdf"
         },
         "Peak Performance Plan": {
             icon: <Leaf size={32} className="text-green-500" />,
             duration: "/ month",
             recommended: false,
-            menuUrl: "/Peak Performance Plan.pdf"
+            menuUrl: "/PeakPerformancePlan.pdf"
         },
         "Focus Start - Trial Pack": {
             icon: <Flame size={32} className="text-orange-400" />,
             duration: "/ 7 days",
             recommended: false,
-            menuUrl: "/Focus Start Plan final1.pdf"
+            menuUrl: "/FocusStartPlan.pdf"
         },
         "Smart Study - Trial Pack": {
             icon: <Star size={32} className="text-yellow-400" />,
             duration: "/ 7 days",
             recommended: true,
-            menuUrl: "/Smart Study Plan.pdf"
+            menuUrl: "/SmartStudyPlan.pdf"
         },
         "Peak Performance - Trial Pack": {
             icon: <Leaf size={32} className="text-green-400" />,
             duration: "/ 7 days",
             recommended: false,
-            menuUrl: "/Peak Performance Plan.pdf"
+            menuUrl: "/PeakPerformancePlan.pdf"
         }
     };
 
@@ -173,15 +173,17 @@ const Landing = () => {
 
                 <div className="flex-1 text-center md:text-left z-10">
                     <div className="inline-block bg-white/90 backdrop-blur-md border border-green-200 text-[var(--primary)] px-6 py-2 rounded-full text-sm font-bold mb-8 tracking-wide shadow-md transform hover:scale-105 transition cursor-default">
-                        🚀 #1 daily meal brand in Varanasi
+                        🚀 #1 Daily Indian Meal Brand in Varanasi
+                        <span className="ml-2 text-xs text-gray-600">
+                            (Expanding soon across India)</span>
                     </div>
                     <h1 className="text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight font-extrabold text-[var(--primary-dark)]">
-                        Authentic <br />
-                        <span className="text-gradient">Ghar Ka Khana</span>,<br /> Daily.
+                        Ghar Ka Khana <br />
+                        <span className="text-gradient">India Ke Har Kone Se</span>,<br />
                     </h1>
                     <p className="text-xl text-gray-700 mb-8 max-w-lg mx-auto md:mx-0 font-medium leading-relaxed">
-                        Taste, Trust, Together. Healthy, hygienic, and tasty tiffins at your doorstep.
-                        Manage your subscription with our smart pause app.
+                        Taste, Trust, Together.
+                        Healthy, hygienic Indian meals inspired by flavours from across India — delivered fresh to your doorstep.
                     </p>
                     <div className="flex flex-col md:flex-row gap-4 justify-center md:justify-start">
                         <button
@@ -284,7 +286,7 @@ const Landing = () => {
                     </div>
 
                     {/* Reels Style Grid - Cinematic */}
-                    <div className="flex gap-8 overflow-x-auto pb-12 snap-x snap-mandatory justify-start md:justify-center scrollbar-hide px-4">
+                    <div className="flex flex-nowrap md:flex-wrap md:justify-center gap-6 md:gap-8 overflow-x-auto pb-12 snap-x snap-mandatory scrollbar-hide px-4">
                         {Array.isArray(videos) && videos.length > 0 ? (
                             videos.map((video) => {
                                 // Helper to convert standard YouTube URL to Embed URL
@@ -309,7 +311,7 @@ const Landing = () => {
                                     }
                                 };
                                 return (
-                                    <div key={video._id} className="group relative w-[280px] h-[500px] flex-shrink-0 rounded-[2.5rem] overflow-hidden cursor-pointer shadow-2xl transform hover:scale-105 transition-all duration-500 border-[8px] border-gray-800 bg-black snap-center ring-1 ring-white/10">
+                                    <div key={video._id} className="group relative w-[240px] md:w-[280px] h-[450px] md:h-[500px] flex-shrink-0 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden cursor-pointer shadow-2xl transform hover:scale-105 transition-all duration-500 border-[6px] md:border-[8px] border-gray-800 bg-black snap-center ring-1 ring-white/10">
                                         {/* Phone Notch Mockup */}
                                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-xl z-30"></div>
 
@@ -353,7 +355,7 @@ const Landing = () => {
             <section id="features" className="py-20 bg-yellow-50/50">
                 <div className="container">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl mb-4">More Than Just A Tiffin 🚀</h2>
+                        <h2 className="text-4xl mb-4">More Than Just A Meal 🥘</h2>
                         <p className="text-gray-600 max-w-2xl mx-auto">We don't just deliver food; we deliver an experience. Here is why 100+ bachelors trust us.</p>
                     </div>
 
@@ -403,7 +405,7 @@ const Landing = () => {
                 <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 2px, transparent 2px)', backgroundSize: '30px 30px' }}></div>
 
                 <div className="container relative z-10">
-                    <h2 className="text-center text-white mb-12">Happy Tummies, Happy Us! ❤️</h2>
+                    <h2 className="text-center text-white mb-12">Why People Trust The Bachelor’s Kitchens ❤️</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {testimonials.map((t, i) => (
                             <div key={i} className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">

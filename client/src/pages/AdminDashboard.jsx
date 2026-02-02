@@ -45,7 +45,7 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         const wrapData = (res) => Array.isArray(res.data) ? res.data : [];
-        
+
         if (activeTab === 'deliveries') {
             api.get('/admin/deliveries').then(res => setDeliveries(wrapData(res))).catch(() => setDeliveries([]));
         } else if (activeTab === 'videos') {
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
             <SEO title="Admin Dashboard" />
             <Navbar />
 
-            <div className="container py-8">
+            <div className="container py-6 md:py-8 px-4 md:px-0">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>

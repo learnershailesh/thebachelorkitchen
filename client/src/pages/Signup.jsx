@@ -86,8 +86,8 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-4">
-            <div className="relative bg-white rounded-[20px] shadow-2xl overflow-hidden flex w-full max-w-4xl min-h-[500px]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-2 md:p-4">
+            <div className="relative bg-white rounded-[20px] shadow-2xl overflow-hidden flex w-full max-w-4xl min-h-[400px] md:min-h-[500px]">
 
                 {/* Left Side - Brand (Background on Mobile, Split on Desktop) */}
                 <div className="absolute inset-0 md:static md:w-1/2 p-10 flex flex-col items-center justify-center bg-[var(--light)] text-center animate-fade-in z-0">
@@ -107,7 +107,7 @@ const Signup = () => {
                 </div>
 
                 {/* Right Side - Signup Form */}
-                <div className="relative z-10 w-full md:w-1/2 p-10 flex flex-col justify-center bg-white/85 md:bg-white backdrop-blur-md md:backdrop-blur-none transition-all">
+                <div className="relative z-10 w-full md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-white/85 md:bg-white backdrop-blur-md md:backdrop-blur-none transition-all">
                     {/* Home Button */}
                     <Link to="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-[var(--primary)] transition-colors mb-6 group w-fit">
                         <Home size={20} className="group-hover:-translate-x-1 transition-transform" />

@@ -59,7 +59,7 @@ const Checkout = () => {
             <SEO title="Checkout - Finalize Your Plan" />
             <Navbar />
 
-            <div className="container max-w-4xl py-12">
+            <div className="container max-w-4xl py-8 md:py-12 px-4 md:px-0">
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-gray-500 hover:text-[var(--primary)] font-bold mb-8 transition"
