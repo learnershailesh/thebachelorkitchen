@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, ArrowRight, Phone, Lock, Home, ShieldCheck, KeyRound } from 'lucide-react';
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { auth } from '../config/firebase';
 
 const Login = () => {
     const [phone, setPhone] = useState('');
@@ -12,27 +14,53 @@ const Login = () => {
     const [otpSent, setOtpSent] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [confirmationResult, setConfirmationResult] = useState(null);
 
-    const { login, sendEmailOtp, verifyEmailOtp } = useAuth();
+    const { login, firebaseLogin } = useAuth();
     const navigate = useNavigate();
 
+
+    const setupRecaptcha = () => {
+        if (!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'invisible',
+                'callback': (response) => {
+                    // reCAPTCHA solved, allow signInWithPhoneNumber.
+                }
+            });
+        }
+    };
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
 
-        if (!email) {
-            setError("Please enter your registered email");
+        if (!phone) {
+            setError("Please enter your mobile number");
             return;
+        }
+
+        // Format phone number to E.164 (Assuming Indian +91 for now, or user provides it)
+        let formattedPhone = phone.trim();
+        if (!formattedPhone.startsWith('+')) {
+            formattedPhone = `+91${formattedPhone}`;
         }
 
         setLoading(true);
         setError("");
 
         try {
-            await sendEmailOtp(email);
+            setupRecaptcha();
+            const appVerifier = window.recaptchaVerifier;
+            const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+            setConfirmationResult(confirmation);
             setOtpSent(true);
         } catch (err) {
-            setError(err || "Failed to send OTP");
+            console.error(err);
+            setError(err.message || "Failed to send OTP");
+            if (window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear();
+                window.recaptchaVerifier = null;
+            }
         } finally {
             setLoading(false);
         }
@@ -49,12 +77,15 @@ const Login = () => {
         setLoading(true);
         setError('');
         try {
-            const loggedInUser = await verifyEmailOtp(email, otp);
+            const result = await confirmationResult.confirm(otp);
+            const idToken = await result.user.getIdToken();
+
+            const loggedInUser = await firebaseLogin(idToken);
 
             if (loggedInUser.role === 'admin') navigate('/admin');
             else navigate('/dashboard');
         } catch (err) {
-            setError(err || 'Invalid OTP or User not found.');
+            setError(err.message || 'Invalid OTP or User not found.');
         } finally {
             setLoading(false);
         }
@@ -111,7 +142,7 @@ const Login = () => {
                             onClick={() => { setLoginMethod('otp'); setError(''); setOtpSent(false); }}
                             className={`flex-1 py-2 text-sm font-bold rounded-lg transition ${loginMethod === 'otp' ? 'bg-white text-[var(--primary)] shadow-sm' : 'text-gray-500'}`}
                         >
-                            Email OTP
+                            Mobile OTP
                         </button>
                         <button
                             onClick={() => { setLoginMethod('password'); setError(''); }}
@@ -171,18 +202,19 @@ const Login = () => {
                     ) : (
                         <form onSubmit={otpSent ? handleVerifyOtp : handleSendOtp}>
                             <div className="mb-6">
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Mobile Number</label>
                                 <div className="relative">
-                                    <span className="absolute left-3 top-3.5 text-gray-400"><Mail size={18} /></span>
+                                    <span className="absolute left-3 top-3.5 text-gray-400"><Phone size={18} /></span>
                                     <input
-                                        type="email"
+                                        type="tel"
                                         disabled={otpSent}
-                                        placeholder="your@email.com"
+                                        placeholder="Enter 10-digit number"
                                         className="w-full pl-10 pr-4 py-3 bg-[var(--light)] border border-transparent rounded-lg focus:bg-white focus:border-[var(--primary)] focus:ring-4 focus:ring-green-50 transition outline-none font-medium disabled:opacity-50"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
                                     />
                                 </div>
+                                <div id="recaptcha-container"></div>
                             </div>
 
                             {otpSent && (
@@ -205,7 +237,7 @@ const Login = () => {
                                         onClick={() => { setOtpSent(false); setOtp(''); }}
                                         className="text-xs text-[var(--primary)] mt-2 font-bold hover:underline"
                                     >
-                                        Change Email Address
+                                        Change Mobile Number
                                     </button>
                                 </div>
                             )}
@@ -227,7 +259,7 @@ const Login = () => {
 
                     <div className="mt-8 pt-8 border-t border-gray-100 flex items-center justify-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                         <ShieldCheck size={14} className="text-green-500" />
-                        Secure Email OTP Auth
+                        Secure Firebase Phone Auth
                     </div>
 
                 </div>

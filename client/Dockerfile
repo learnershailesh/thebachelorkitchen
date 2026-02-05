@@ -34,7 +34,13 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Create entrypoint script inline for runtime env injection
 RUN echo '#!/bin/sh' > /docker-entrypoint.d/40-env-entrypoint.sh && \
     echo 'echo "window._env_ = {" > /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
-    echo 'echo "  VITE_API_BASE_URL: \"${VITE_API_BASE_URL}\"" >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
+    echo 'echo "  VITE_API_BASE_URL: \"${VITE_API_BASE_URL}\"," >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
+    echo 'echo "  VITE_FIREBASE_API_KEY: \"${VITE_FIREBASE_API_KEY}\"," >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
+    echo 'echo "  VITE_FIREBASE_AUTH_DOMAIN: \"${VITE_FIREBASE_AUTH_DOMAIN}\"," >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
+    echo 'echo "  VITE_FIREBASE_PROJECT_ID: \"${VITE_FIREBASE_PROJECT_ID}\"," >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
+    echo 'echo "  VITE_FIREBASE_STORAGE_BUCKET: \"${VITE_FIREBASE_STORAGE_BUCKET}\"," >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
+    echo 'echo "  VITE_FIREBASE_MESSAGING_SENDER_ID: \"${VITE_FIREBASE_MESSAGING_SENDER_ID}\"," >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
+    echo 'echo "  VITE_FIREBASE_APP_ID: \"${VITE_FIREBASE_APP_ID}\"" >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
     echo 'echo "};" >> /usr/share/nginx/html/config.js' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
     echo 'exec "$@"' >> /docker-entrypoint.d/40-env-entrypoint.sh && \
     chmod +x /docker-entrypoint.d/40-env-entrypoint.sh

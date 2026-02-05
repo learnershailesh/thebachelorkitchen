@@ -148,6 +148,33 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const firebaseLogin = async (idToken) => {
+    try {
+      const { data } = await api.post('/auth/firebase-login', { idToken });
+
+      const userObj = {
+        _id: data._id,
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        role: data.role,
+        address: data.address
+      };
+
+      // Save Session
+      localStorage.setItem('tiffin_user', JSON.stringify(userObj));
+      localStorage.setItem('tiffin_token', data.token);
+
+      // Set State & Header
+      setUser(userObj);
+      api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+
+      return userObj;
+    } catch (error) {
+      throw error.response?.data?.message || 'Firebase login failed';
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('tiffin_user');
@@ -156,7 +183,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, sendEmailOtp, verifyEmailOtp, loading, api }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, sendEmailOtp, verifyEmailOtp, firebaseLogin, loading, api }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const admin = require('../config/firebaseAdmin');
 
 // Nodemailer Transporter Configuration
 const transporter = nodemailer.createTransport({
@@ -160,122 +161,62 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     }
 });
 
-// @desc    Send OTP to email
-// @route   POST /api/auth/send-otp
+// @desc    Verify Firebase ID Token and Login/Register
+// @route   POST /api/auth/firebase-login
 // @access  Public
-const sendEmailOTP = asyncHandler(async (req, res) => {
-    const { email } = req.body;
+const firebaseLogin = asyncHandler(async (req, res) => {
+    const { idToken } = req.body;
 
-    if (!email) {
+    if (!idToken) {
         res.status(400);
-        throw new Error('Please enter an email address');
+        throw new Error('Firebase ID Token is required');
     }
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-        res.status(404);
-        throw new Error('No account found with this email');
-    }
-
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-
-    // Reset attempts on new OTP request
-    user.otp = otp;
-    user.otpExpire = otpExpire;
-    user.otpAttempts = 0;
-    user.otpLockedUntil = null;
-    await user.save();
-
-    // Send Email
-    const mailOptions = {
-        from: `"The Bachelor's Kitchen" <${process.env.SMTP_FROM_EMAIL}>`,
-        to: email,
-        subject: 'Your Login OTP - The Bachelor\'s Kitchen',
-        html: `
-            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                <h2 style="color: #f59e0b;">Welcome Back!</h2>
-                <p>Use the following OTP to log in to your account. This code is valid for 10 minutes.</p>
-                <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; margin: 20px 0;">
-                    ${otp}
-                </div>
-                <p>If you didn't request this, please ignore this email.</p>
-                <p>Best regards,<br>The Bachelor's Kitchen Team</p>
-            </div>
-        `,
-    };
 
     try {
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ message: 'OTP sent to email' });
-    } catch (error) {
-        console.error('Email sending failed details:', error);
-        res.status(500);
-        throw new Error(`Failed to send OTP email: ${error.message}`);
-    }
-});
+        // Verify the ID token
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const { phone_number, name, email } = decodedToken;
 
-// @desc    Verify Email OTP
-// @route   POST /api/auth/verify-otp
-// @access  Public
-const verifyEmailOTP = asyncHandler(async (req, res) => {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-        res.status(400);
-        throw new Error('Email and OTP are required');
-    }
-    const user = await User.findOne({ email });
-
-    if (!user) {
-        res.status(404);
-        throw new Error('User not found');
-    }
-
-    // Brute-force protection
-    if (user.otpLockedUntil && user.otpLockedUntil > new Date()) {
-        res.status(429);
-        throw new Error('Account locked due to too many failed attempts. Please try again later.');
-    }
-
-    if (!user.otp || user.otp !== otp || user.otpExpire < new Date()) {
-        user.otpAttempts += 1;
-        if (user.otpAttempts >= 5) {
-            user.otpLockedUntil = new Date(Date.now() + 30 * 60 * 1000); // Lock for 30 mins
-            await user.save();
-            res.status(401);
-            throw new Error('Too many failed attempts. Account locked for 30 minutes.');
+        if (!phone_number) {
+            res.status(400);
+            throw new Error('Phone number not found in Firebase token');
         }
-        await user.save();
-        res.status(400);
-        throw new Error('Invalid or expired OTP');
+
+        // Find or create user
+        let user = await User.findOne({ phone: phone_number });
+
+        if (!user) {
+            // New user registration via Firebase
+            user = await User.create({
+                name: name || 'Firebase User',
+                phone: phone_number,
+                email: email || `${phone_number}@temp.com`, // Fallback email
+                password: await bcrypt.hash(Math.random().toString(36), 10), // Random password for new users
+                role: 'customer'
+            });
+        }
+
+        res.status(200).json({
+            _id: user.id,
+            name: user.name,
+            phone: user.phone,
+            email: user.email,
+            role: user.role,
+            address: user.address,
+            token: generateToken(user._id)
+        });
+    } catch (error) {
+        console.error('Firebase token verification failed:', error.message);
+        res.status(401);
+        throw new Error('Invalid Firebase token');
     }
-
-    // Clear OTP and attempts after successful login
-    user.otp = null;
-    user.otpExpire = null;
-    user.otpAttempts = 0;
-    user.otpLockedUntil = null;
-    await user.save();
-
-    res.json({
-        _id: user.id,
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        role: user.role,
-        address: user.address,
-        token: generateToken(user._id)
-    });
 });
+
 
 
 module.exports = {
     registerUser,
     loginUser,
-    sendEmailOTP,
-    verifyEmailOTP,
+    firebaseLogin,
     updateUserProfile
 };
