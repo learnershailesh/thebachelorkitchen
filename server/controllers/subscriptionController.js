@@ -34,22 +34,22 @@ const createSubscription = asyncHandler(async (req, res) => {
     const start = startDate ? new Date(startDate) : new Date();
     const end = addDaysDate(start, duration);
 
-    const isUPI = paymentMethod === 'upi';
+    const isManual = ['upi', 'cash'].includes(paymentMethod);
 
     const subscription = await Subscription.create({
         userId: req.user.id,
         planId,
         startDate: start,
         endDate: end,
-        status: isUPI ? 'pending_approval' : 'active',
+        status: isManual ? 'pending_approval' : 'active',
         paymentMethod: paymentMethod || 'razorpay',
-        paymentStatus: isUPI ? 'pending' : 'completed',
+        paymentStatus: isManual ? 'pending' : 'completed',
         transactionId: transactionId || null
     });
 
-    if (isUPI) {
+    if (isManual) {
         await Notification.create({
-            message: `New UPI Payment from ${req.user.name} for planID: ${planId}. Transaction ID: ${transactionId}`,
+            message: `New ${paymentMethod.toUpperCase()} Payment from ${req.user.name} for Plan. ${transactionId ? `Transaction ID: ${transactionId}` : 'Status: Pending Verification'}`,
             type: 'order'
         });
     }

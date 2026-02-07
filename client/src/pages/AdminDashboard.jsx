@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import { Users, Truck, CheckSquare, CheckCircle, Utensils, Video, Plus, Trash2, Bell, Search } from 'lucide-react';
+import { Users, Truck, CheckSquare, CheckCircle, Utensils, Video, Plus, Trash2, Bell, Search, Star, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
 import SEO from '../components/SEO';
@@ -12,9 +12,13 @@ const AdminDashboard = () => {
 
     // Stats & Deliveries Data
     const [stats, setStats] = useState({ totalUsers: 0, activeSubscription: 0, deliveriesToday: 0, skippedToday: 0 });
+    // Dispatch Data
+    const [dispatchDate, setDispatchDate] = useState(new Date().toISOString().split('T')[0]);
+    const [statusFilter, setStatusFilter] = useState('All'); // All, Pending, Delivered, Skipped, Paused
     const [deliveries, setDeliveries] = useState([]);
 
     // Menu Data
+    const [selectedMenuPlan, setSelectedMenuPlan] = useState('Focus Start Plan');
     const [menuDate, setMenuDate] = useState(new Date().toISOString().split('T')[0]);
     const [menuItems, setMenuItems] = useState({ lunch: '', dinner: '' });
     const [menuLoading, setMenuLoading] = useState(false);
@@ -28,11 +32,12 @@ const AdminDashboard = () => {
     const [notifications, setNotifications] = useState([]);
     const [subscriptions, setSubscriptions] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [allFeedback, setAllFeedback] = useState([]);
 
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const statsRes = await api.get('/admin/stats');
+                const statsRes = await api.get(`/admin/stats?date=${dispatchDate}`);
                 setStats(statsRes.data);
             } catch (error) {
                 console.error("Failed to fetch stats", error);
@@ -41,13 +46,13 @@ const AdminDashboard = () => {
             }
         };
         fetchInitialData();
-    }, [api]);
+    }, [api, dispatchDate]);
 
     useEffect(() => {
         const wrapData = (res) => Array.isArray(res.data) ? res.data : [];
 
         if (activeTab === 'deliveries') {
-            api.get('/admin/deliveries').then(res => setDeliveries(wrapData(res))).catch(() => setDeliveries([]));
+            api.get(`/admin/deliveries?date=${dispatchDate}`).then(res => setDeliveries(wrapData(res))).catch(() => setDeliveries([]));
         } else if (activeTab === 'videos') {
             api.get('/admin/videos').then(res => setVideos(wrapData(res))).catch(() => setVideos([]));
         } else if (activeTab === 'customers') {
@@ -56,15 +61,17 @@ const AdminDashboard = () => {
             api.get('/admin/notifications').then(res => setNotifications(wrapData(res))).catch(() => setNotifications([]));
         } else if (activeTab === 'subscriptions') {
             api.get('/subscription/admin/all').then(res => setSubscriptions(wrapData(res))).catch(() => setSubscriptions([]));
+        } else if (activeTab === 'feedback') {
+            api.get('/feedback/admin/all').then(res => setAllFeedback(wrapData(res))).catch(() => setAllFeedback([]));
         }
     }, [activeTab, api]);
 
-    // Fetch Menu when date changes
+    // Fetch Menu when date or plan changes
     useEffect(() => {
         if (activeTab === 'menu') {
             const fetchMenu = async () => {
                 try {
-                    const res = await api.get(`/admin/menu?date=${menuDate}`);
+                    const res = await api.get(`/admin/menu?date=${menuDate}&planName=${selectedMenuPlan}`);
                     const { items } = res.data;
                     setMenuItems({
                         lunch: items?.lunch?.join(', ') || '',
@@ -76,17 +83,18 @@ const AdminDashboard = () => {
             };
             fetchMenu();
         }
-    }, [menuDate, activeTab, api]);
+    }, [menuDate, selectedMenuPlan, activeTab, api]);
 
     const handleSaveMenu = async () => {
         setMenuLoading(true);
         try {
             await api.post('/admin/menu', {
                 date: menuDate,
+                planName: selectedMenuPlan,
                 lunch: menuItems.lunch.split(',').map(s => s.trim()).filter(Boolean),
                 dinner: menuItems.dinner.split(',').map(s => s.trim()).filter(Boolean)
             });
-            alert('Menu Updated!');
+            alert(`${selectedMenuPlan} Menu Updated!`);
         } catch (error) {
             alert('Failed to update menu');
         } finally {
@@ -133,6 +141,15 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleToggleFeedbackVisibility = async (id, currentStatus) => {
+        try {
+            await api.put(`/feedback/admin/status/${id}`, { isPublic: !currentStatus });
+            setAllFeedback(prev => prev.map(f => f._id === id ? { ...f, isPublic: !currentStatus } : f));
+        } catch (error) {
+            alert('Failed to update feedback visibility');
+        }
+    };
+
     if (loading) return <div className="p-10 text-center">Loading Admin Dashboard...</div>;
 
     return (
@@ -150,28 +167,40 @@ const AdminDashboard = () => {
 
                 {/* KPI Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div className="card flex items-center gap-4 border border-blue-100 shadow-sm p-6">
+                    <div
+                        onClick={() => setActiveTab('customers')}
+                        className="card flex items-center gap-4 border border-blue-100 shadow-sm p-6 cursor-pointer hover:shadow-md transition hover:border-blue-200"
+                    >
                         <div className="p-3 bg-blue-100 text-blue-600 rounded-full shrink-0"><Users size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.totalUsers}</div>
                             <div className="text-sm text-gray-500">Total Users</div>
                         </div>
                     </div>
-                    <div className="card flex items-center gap-4 border border-green-100 shadow-sm p-6">
+                    <div
+                        onClick={() => setActiveTab('subscriptions')}
+                        className="card flex items-center gap-4 border border-green-100 shadow-sm p-6 cursor-pointer hover:shadow-md transition hover:border-green-200"
+                    >
                         <div className="p-3 bg-green-100 text-green-600 rounded-full shrink-0"><CheckSquare size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.activeSubscription}</div>
                             <div className="text-sm text-gray-500">Active Subs</div>
                         </div>
                     </div>
-                    <div className="card flex items-center gap-4 border border-orange-100 shadow-sm p-6">
+                    <div
+                        onClick={() => { setActiveTab('deliveries'); setStatusFilter('All'); }}
+                        className="card flex items-center gap-4 border border-orange-100 shadow-sm p-6 cursor-pointer hover:shadow-md transition hover:border-orange-200"
+                    >
                         <div className="p-3 bg-orange-100 text-orange-600 rounded-full shrink-0"><Truck size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.deliveriesToday}</div>
                             <div className="text-sm text-gray-500">Today's Deliveries</div>
                         </div>
                     </div>
-                    <div className="card flex items-center gap-4 border border-red-100 shadow-sm p-6">
+                    <div
+                        onClick={() => { setActiveTab('deliveries'); setStatusFilter('Skipped'); }}
+                        className="card flex items-center gap-4 border border-red-100 shadow-sm p-6 cursor-pointer hover:shadow-md transition hover:border-red-200"
+                    >
                         <div className="p-3 bg-red-100 text-red-600 rounded-full shrink-0"><Utensils size={24} /></div>
                         <div>
                             <div className="text-2xl font-bold">{stats.skippedToday}</div>
@@ -218,13 +247,44 @@ const AdminDashboard = () => {
                     >
                         <div className="flex items-center gap-2"><CheckCircle size={18} /> Subscriptions</div>
                     </button>
+                    <button
+                        onClick={() => setActiveTab('feedback')}
+                        className={`pb-3 px-2 font-medium transition whitespace-nowrap ${activeTab === 'feedback' ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-gray-500'}`}
+                    >
+                        <div className="flex items-center gap-2"><MessageSquare size={18} /> Feedback</div>
+                    </button>
                 </div>
 
                 {/* CONTENT AREA */}
                 {activeTab === 'deliveries' && (
                     <div className="card p-0 overflow-hidden shadow-sm">
-                        <div className="p-6 border-b border-gray-100 bg-white">
+                        <div className="p-6 border-b border-gray-100 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <h3 className="mb-0">Today's Dispatch List</h3>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-gray-500">Status:</label>
+                                    <select
+                                        value={statusFilter}
+                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                        className="p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                                    >
+                                        <option value="All">All Status</option>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Delivered">Delivered</option>
+                                        <option value="Skipped">All Skips</option>
+                                        <option value="Paused">Paused</option>
+                                    </select>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-gray-500">Date:</label>
+                                    <input
+                                        type="date"
+                                        value={dispatchDate}
+                                        onChange={(e) => setDispatchDate(e.target.value)}
+                                        className="p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
@@ -241,28 +301,34 @@ const AdminDashboard = () => {
                                     {Array.isArray(deliveries) && deliveries.length === 0 ? (
                                         <tr><td colSpan="5" className="p-8 text-center text-gray-500">No deliveries scheduled.</td></tr>
                                     ) : Array.isArray(deliveries) ? (
-                                        deliveries.map((item) => (
-                                            <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50">
-                                                <td className="p-4 font-medium">{item.name}<div className="text-xs text-gray-400">{item.phone}</div></td>
-                                                <td className="p-4 text-sm text-gray-600 max-w-xs">{item.address}</td>
-                                                <td className="p-4"><span className="tag tag-success">{item.plan}</span></td>
-                                                <td className="p-4">
-                                                    <span className={`font-semibold  px-2 py-1 rounded text-xs 
+                                        deliveries
+                                            .filter(item => {
+                                                if (statusFilter === 'All') return true;
+                                                if (statusFilter === 'Skipped') return item.status.includes('Skipped');
+                                                return item.status === statusFilter;
+                                            })
+                                            .map((item) => (
+                                                <tr key={item.id} className="border-b border-gray-50 hover:bg-gray-50">
+                                                    <td className="p-4 font-medium">{item.name}<div className="text-xs text-gray-400">{item.phone}</div></td>
+                                                    <td className="p-4 text-sm text-gray-600 max-w-xs">{item.address}</td>
+                                                    <td className="p-4"><span className="tag tag-success">{item.plan}</span></td>
+                                                    <td className="p-4">
+                                                        <span className={`font-semibold  px-2 py-1 rounded text-xs 
                                                         ${item.status === 'Delivered' ? 'bg-green-100 text-green-700' :
-                                                            item.status.includes('Skipped') ? 'bg-red-100 text-red-700' :
-                                                                item.status === 'Paused' ? 'bg-gray-100 text-gray-500' :
-                                                                    'bg-orange-100 text-orange-700'}`}>
-                                                        {item.status}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    {item.status === 'Pending' && (
-                                                        <button onClick={() => handleMarkDelivered(item.id)} className="btn btn-primary text-sm py-1 px-3">Delivered</button>
-                                                    )}
-                                                    {item.status === 'Delivered' && <span className="text-green-600 flex justify-end gap-1"><CheckCircle size={16} /> Done</span>}
-                                                </td>
-                                            </tr>
-                                        ))
+                                                                item.status.includes('Skipped') ? 'bg-red-100 text-red-700' :
+                                                                    item.status === 'Paused' ? 'bg-gray-100 text-gray-500' :
+                                                                        'bg-orange-100 text-orange-700'}`}>
+                                                            {item.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-right">
+                                                        {item.status === 'Pending' && (
+                                                            <button onClick={() => handleMarkDelivered(item.id)} className="btn btn-primary text-sm py-1 px-3">Delivered</button>
+                                                        )}
+                                                        {item.status === 'Delivered' && <span className="text-green-600 flex justify-end gap-1"><CheckCircle size={16} /> Done</span>}
+                                                    </td>
+                                                </tr>
+                                            ))
                                     ) : null}
                                 </tbody>
                             </table>
@@ -272,16 +338,30 @@ const AdminDashboard = () => {
 
                 {activeTab === 'menu' && (
                     <div className="card max-w-2xl mx-auto shadow-sm">
-                        <h3 className="mb-6">Update Daily Menu</h3>
+                        <h3 className="mb-6 text-center">Update Daily Menu</h3>
 
-                        <div className="mb-6">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Select Date</label>
-                            <input
-                                type="date"
-                                value={menuDate}
-                                onChange={(e) => setMenuDate(e.target.value)}
-                                className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[var(--primary)]"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Select Plan</label>
+                                <select
+                                    value={selectedMenuPlan}
+                                    onChange={(e) => setSelectedMenuPlan(e.target.value)}
+                                    className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm"
+                                >
+                                    <option value="Focus Start Plan">Focus Start Plan</option>
+                                    <option value="Smart Study Plan">Smart Study Plan</option>
+                                    <option value="Peak Performance Plan">Peak Performance Plan</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">Select Date</label>
+                                <input
+                                    type="date"
+                                    value={menuDate}
+                                    onChange={(e) => setMenuDate(e.target.value)}
+                                    className="w-full p-3 border rounded-lg outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm"
+                                />
+                            </div>
                         </div>
 
                         <div className="space-y-6">
@@ -518,6 +598,71 @@ const AdminDashboard = () => {
                                                 </tr>
                                             ))
                                     ) : null}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'feedback' && (
+                    <div className="card p-0 overflow-hidden shadow-sm">
+                        <div className="p-6 border-b border-gray-100 bg-white">
+                            <h3 className="mb-0">Customer Feedback</h3>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-gray-50 text-gray-500 text-xs font-black uppercase tracking-widest">
+                                    <tr>
+                                        <th className="p-4">Customer</th>
+                                        <th className="p-4">Rating</th>
+                                        <th className="p-4">Comment</th>
+                                        <th className="p-4">Date</th>
+                                        <th className="p-4">Public?</th>
+                                        <th className="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {allFeedback.length > 0 ? (
+                                        allFeedback.map((f) => (
+                                            <tr key={f._id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="p-4">
+                                                    <div className="font-bold text-gray-800">{f.userId?.name || 'N/A'}</div>
+                                                    <div className="text-xs text-gray-500">{f.userId?.email || ''}</div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="flex gap-0.5">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star key={i} size={14} className={i < f.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'} />
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <p className="text-sm text-gray-600 max-w-md italic">"{f.comment}"</p>
+                                                </td>
+                                                <td className="p-4 text-xs font-medium text-gray-500">
+                                                    {new Date(f.createdAt).toLocaleDateString()}
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${f.isPublic ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                                                        {f.isPublic ? 'Visible' : 'Hidden'}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <button
+                                                        onClick={() => handleToggleFeedbackVisibility(f._id, f.isPublic)}
+                                                        className={`p-2 rounded-lg transition ${f.isPublic ? 'bg-gray-100 text-gray-500 hover:bg-orange-50 hover:text-orange-500' : 'bg-[var(--primary)] text-white hover:opacity-90'}`}
+                                                        title={f.isPublic ? 'Hide from Landing Page' : 'Show on Landing Page'}
+                                                    >
+                                                        {f.isPublic ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan="6" className="p-10 text-center text-gray-400">No feedback received yet.</td>
+                                        </tr>
+                                    )}
                                 </tbody>
                             </table>
                         </div>

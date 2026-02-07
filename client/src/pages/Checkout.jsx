@@ -101,7 +101,7 @@ const Checkout = () => {
                         <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 flex gap-4">
                             <Info className="text-blue-500 shrink-0" size={24} />
                             <p className="text-sm text-blue-700 leading-relaxed">
-                                <strong>Note:</strong> Since we are currently updating our payment gateway, we are accepting manual payments via UPI. Your subscription will be activated within 2-4 hours after verification.
+                                <strong>Note:</strong> Since we are currently updating our payment gateway, we are accepting manual payments via UPI or Cash. Your subscription will be activated after admin verification.
                             </p>
                         </div>
                     </div>
@@ -187,7 +187,7 @@ const Checkout = () => {
                                 </div>
                                 <h3 className="text-xl font-bold">Great Choice!</h3>
                                 <p className="text-gray-500 text-sm leading-relaxed max-w-[250px] mx-auto">
-                                    You can pay for your subscription when we deliver your first meal.
+                                    You can pay for your subscription when we deliver your first meal. Your plan will be activated after admin verification.
                                 </p>
                                 <button
                                     onClick={handleSubmit}

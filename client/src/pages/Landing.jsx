@@ -11,6 +11,7 @@ const Landing = () => {
     const [openFaq, setOpenFaq] = useState(null);
     const [plans, setPlans] = useState([]);
     const [videos, setVideos] = useState([]);
+    const [publicFeedback, setPublicFeedback] = useState([]);
     const [billingCycle, setBillingCycle] = useState('monthly'); // 'monthly' or 'trial'
     const { user, api } = useAuth();
     const navigate = useNavigate();
@@ -121,8 +122,17 @@ const Landing = () => {
             }
         };
 
+        const fetchFeedback = async () => {
+            try {
+                const { data } = await api.get('/feedback/public');
+                setPublicFeedback(data);
+            } catch (error) {
+                console.error("Failed to fetch feedback", error);
+            }
+        };
+
         const loadAll = async () => {
-            await Promise.all([fetchPlans(), fetchVideos()]);
+            await Promise.all([fetchPlans(), fetchVideos(), fetchFeedback()]);
             // After data is loaded and rendered, check if we need to scroll to a hash
             if (window.location.hash) {
                 const id = window.location.hash.substring(1);
@@ -145,11 +155,20 @@ const Landing = () => {
         navigate('/checkout', { state: { plan: serializablePlan } });
     };
 
-    const testimonials = [
+    const staticTestimonials = [
         { name: "Rahul S.", role: "Software Engineer", text: "The pause feature is a lifesaver! I travel a lot and never lose money now. Food is just like home." },
         { name: "Priya M.", role: "Student", text: "Healthy diet plan helped me lose 3kgs. The paneer salad is amazing!" },
         { name: "Amit K.", role: "Banker", text: "Timely delivery every single day. The packaging is spill-proof and hygienic." }
     ];
+
+    const testimonials = publicFeedback.length > 0
+        ? publicFeedback.map(f => ({
+            name: f.userId?.name || 'Happy Eater',
+            role: 'Verified Customer',
+            text: f.comment,
+            rating: f.rating
+        }))
+        : staticTestimonials;
 
     const faqs = [
         { q: "Can I pause my meal for just one day?", a: "Yes! Use our Smart Calendar app to pause your meal before 10 PM the previous day. Your subscription validity will automatically extend by 1 day." },
@@ -408,9 +427,16 @@ const Landing = () => {
                     <h2 className="text-center text-white mb-12">Why People Trust The Bachelor’s Kitchens ❤️</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {testimonials.map((t, i) => (
-                            <div key={i} className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-                                <Quote className="text-[var(--secondary)] mb-4" size={32} />
-                                <p className="text-lg mb-6 leading-relaxed opacity-90">"{t.text}"</p>
+                            <div key={i} className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 relative group hover:bg-white/20 transition-all duration-300">
+                                <Quote className="text-[var(--secondary)] mb-4 opacity-50" size={32} />
+                                {t.rating && (
+                                    <div className="flex gap-1 mb-3">
+                                        {[...Array(t.rating)].map((_, i) => (
+                                            <Star key={i} size={14} className="fill-yellow-400 text-yellow-400" />
+                                        ))}
+                                    </div>
+                                )}
+                                <p className="text-lg mb-6 leading-relaxed opacity-90 italic">"{t.text}"</p>
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-full bg-[var(--secondary)] flex items-center justify-center text-[var(--primary)] font-bold">
                                         {t.name[0]}

@@ -53,29 +53,33 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     // 2. Active Subscriptions
     const activeSubscription = await Subscription.countDocuments({ status: 'active' });
 
-    // 3. Deliveries Scheduled Today & Skipped Count
-    const today = new Date();
+    // 3. Deliveries Scheduled for a specific date
+    const { date } = req.query;
+    const today = date ? new Date(date) : new Date();
     today.setHours(0, 0, 0, 0);
 
     const activeSubs = await Subscription.find({
         status: 'active',
-        startDate: { $lte: new Date() }, // Started in past
-        endDate: { $gte: today }        // Ends in future
-    });
+        startDate: { $lte: new Date(today.getTime() + 24 * 60 * 60 * 1000) }, // Use next day boundary to be safe
+        endDate: { $gte: today }
+    }).populate('userId planId'); // Populate to filter out zombies
 
     let deliveriesToday = 0;
     let skippedToday = 0;
 
     activeSubs.forEach(sub => {
+        // Safety check for deleted users/plans
+        if (!sub.userId || !sub.planId) return;
+
         // Check Paused
-        const isPaused = sub.pausedDates.some(pd => {
+        const isPaused = sub.pausedDates?.some(pd => {
             const d = new Date(pd);
             d.setHours(0, 0, 0, 0);
             return d.getTime() === today.getTime();
         });
 
         // Check Skipped
-        const skippedEntry = sub.skippedMeals.find(s => {
+        const skippedEntry = sub.skippedMeals?.find(s => {
             const d = new Date(s.date);
             d.setHours(0, 0, 0, 0);
             return d.getTime() === today.getTime();
@@ -107,15 +111,14 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/deliveries
 // @access  Private/Admin
 const getDailyDeliveries = asyncHandler(async (req, res) => {
-    const today = new Date();
+    const { date } = req.query;
+    const today = date ? new Date(date) : new Date();
     today.setHours(0, 0, 0, 0);
 
     // Find active subscriptions
-    // Populate User to get Name/Address/Phone
-    // Populate Plan to get Plan Name
     const activeSubs = await Subscription.find({
         status: 'active',
-        startDate: { $lte: new Date() },
+        startDate: { $lte: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
         endDate: { $gte: today }
     })
         .populate('userId', 'name address phone')
@@ -124,15 +127,18 @@ const getDailyDeliveries = asyncHandler(async (req, res) => {
     const deliveries = [];
 
     activeSubs.forEach(sub => {
+        // Safety check: skip if user or plan deleted
+        if (!sub.userId || !sub.planId) return;
+
         // Check if today is paused
-        const isPaused = sub.pausedDates.some(pd => {
+        const isPaused = sub.pausedDates?.some(pd => {
             const d = new Date(pd);
             d.setHours(0, 0, 0, 0);
             return d.getTime() === today.getTime();
         });
 
         // Check if skipped
-        const skippedEntry = sub.skippedMeals.find(s => {
+        const skippedEntry = sub.skippedMeals?.find(s => {
             const d = new Date(s.date);
             d.setHours(0, 0, 0, 0);
             return d.getTime() === today.getTime();
@@ -151,10 +157,6 @@ const getDailyDeliveries = asyncHandler(async (req, res) => {
                 status = 'Skipped (Dinner)';
             }
         }
-
-        // Only add if not fully skipped/paused? Or show them so admin knows.
-        // User said: "make sure admin should know... so food is not waste"
-        // Showing them with "Skipped" status is best.
 
         deliveries.push({
             id: sub._id,
@@ -177,23 +179,26 @@ const getDailyDeliveries = asyncHandler(async (req, res) => {
 // @route   GET /api/admin/menu
 // @access  Public (or Protected based on usage)
 const getMenu = asyncHandler(async (req, res) => {
-    const { date } = req.query;
+    const { date, planName } = req.query;
     if (date) {
         const queryDate = new Date(date);
         queryDate.setHours(0, 0, 0, 0);
 
-        // Exact match for the date (ignoring time)
-        // Since we store date as Date object, best to range query for that day or store YYYY-MM-DD string.
-        // Let's assume we range query the day.
         const nextDay = new Date(queryDate);
         nextDay.setDate(nextDay.getDate() + 1);
 
-        const menu = await Menu.findOne({
+        const filter = {
             date: { $gte: queryDate, $lt: nextDay }
-        });
+        };
+
+        if (planName) {
+            filter.planName = planName;
+        }
+
+        const menu = await Menu.findOne(filter);
         res.json(menu || { items: { lunch: [], dinner: [] } });
     } else {
-        const menus = await Menu.find({}).sort({ date: -1 }).limit(7);
+        const menus = await Menu.find({}).sort({ date: -1 }).limit(21); // Increased limit to cover 7 days for 3 plans
         res.json(menus);
     }
 });
@@ -202,16 +207,22 @@ const getMenu = asyncHandler(async (req, res) => {
 // @route   POST /api/admin/menu
 // @access  Private/Admin
 const updateMenu = asyncHandler(async (req, res) => {
-    const { date, lunch, dinner } = req.body; // lunch/dinner are arrays of strings
+    const { date, planName, lunch, dinner } = req.body; // lunch/dinner are arrays of strings
+
+    if (!planName) {
+        res.status(400);
+        throw new Error("Plan name is required");
+    }
 
     const menuDate = new Date(date);
     menuDate.setHours(0, 0, 0, 0);
 
     const menu = await Menu.findOneAndUpdate(
-        { date: menuDate },
+        { date: menuDate, planName: planName },
         {
             items: { lunch, dinner },
-            date: menuDate
+            date: menuDate,
+            planName: planName
         },
         { new: true, upsert: true } // Create if not exists
     );

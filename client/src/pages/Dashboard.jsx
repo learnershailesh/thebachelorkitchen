@@ -3,8 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import SmartCalendar from '../components/SmartCalendar';
 import { format, addDays, isSameDay, setHours, setMinutes, isAfter, differenceInDays } from 'date-fns';
-import { Edit2, MapPin, X, Utensils, UtensilsCrossed, Clock, Calendar, ChevronRight, HelpCircle, Package, AlertCircle } from 'lucide-react';
+import { Edit2, MapPin, X, Utensils, UtensilsCrossed, Clock, Calendar, ChevronRight, HelpCircle, Package, AlertCircle, MessageSquare } from 'lucide-react';
 import SEO from '../components/SEO';
+import FeedbackModal from '../components/FeedbackModal';
 
 const Dashboard = () => {
     const { user, api, updateProfile } = useAuth();
@@ -20,6 +21,9 @@ const Dashboard = () => {
     const [isSkipModalOpen, setIsSkipModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState(null);
     const [skippingLoading, setSkippingLoading] = useState(false);
+
+    // Feedback Modal State
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
     const [menuData, setMenuData] = useState(null);
 
@@ -114,6 +118,16 @@ const Dashboard = () => {
             alert(error);
         } finally {
             setUpdatingAddress(false);
+        }
+    };
+
+    const handleFeedbackSubmit = async (feedbackData) => {
+        try {
+            await api.post('/feedback', feedbackData);
+            alert('Thank you for your feedback! ❤️');
+        } catch (error) {
+            console.error('Feedback failed:', error);
+            throw error;
         }
     };
 
@@ -379,19 +393,32 @@ const Dashboard = () => {
                     </div>
 
                     <div>
-                        <div className="bg-[var(--light)] p-8 rounded-3xl border border-blue-100/50 h-full">
-                            <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-blue-500 mb-6">
-                                <HelpCircle size={24} />
+                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm mb-6">
+                            <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 mb-6">
+                                <MessageSquare size={24} />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-800 mb-2">Need a break?</h3>
-                            <p className="text-gray-500 text-sm leading-relaxed mb-8">
-                                Going on a holiday? You can pause your subscription for up to 7 days. Your plan will be extended automatically.
+                            <h3 className="text-lg font-bold text-gray-800 mb-2">How's the food?</h3>
+                            <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                                Your feedback helps us improve. Share your thoughts about our service or today's meal.
+                            </p>
+                            <button
+                                onClick={() => setIsFeedbackModalOpen(true)}
+                                className="w-full py-4 rounded-xl bg-[var(--primary)] text-white font-black shadow-lg shadow-green-200 transition-transform active:scale-95 block text-center"
+                            >
+                                Give Feedback
+                            </button>
+                        </div>
+
+                        <div className="bg-[var(--light)] p-6 rounded-3xl border border-blue-100/50">
+                            <h3 className="text-md font-bold text-blue-900 mb-2">Need a break?</h3>
+                            <p className="text-gray-500 text-xs leading-relaxed mb-6">
+                                Going on a holiday? Pause your subscription via WhatsApp.
                             </p>
                             <a
                                 href="https://wa.me/917307191299"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-full py-4 rounded-xl bg-white text-blue-600 font-bold shadow-sm hover:shadow-md transition border border-blue-50 block text-center"
+                                className="w-full py-3 rounded-xl bg-white text-blue-600 font-bold shadow-sm hover:shadow-md transition text-sm border border-blue-50 block text-center"
                             >
                                 Contact Support
                             </a>
@@ -485,6 +512,12 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+            {/* Feedback Modal */}
+            <FeedbackModal
+                isOpen={isFeedbackModalOpen}
+                onClose={() => setIsFeedbackModalOpen(false)}
+                onSubmit={handleFeedbackSubmit}
+            />
         </div>
     );
 };
