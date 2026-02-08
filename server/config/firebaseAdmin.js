@@ -1,15 +1,20 @@
 const admin = require('firebase-admin');
-const path = require('path');
 
 try {
-    // Initialize Firebase Admin with Application Default Credentials (ADC)
-    // In local development, set GOOGLE_APPLICATION_CREDENTIALS to the path of your federation config JSON.
-    // In production (AWS), credentials will be automatically resolved via IAM Roles.
-    admin.initializeApp();
-    console.log('Firebase Admin initialized successfully (using Application Default Credentials)');
+    const config = {
+        projectId: process.env.FIREBASE_PROJECT_ID
+    };
+
+    // Initialize Firebase Admin
+    // In Production (AWS): Will use Workload Identity Federation via the environment.
+    // In Local Dev: If GOOGLE_APPLICATION_CREDENTIALS is set to the federation JSON, 
+    // it may fail due to missing AWS metadata service. For local token verification, 
+    // the projectId alone is often sufficient.
+    admin.initializeApp(config);
+
+    console.log(`Firebase Admin initialized for project: ${config.projectId || 'default'}`);
 } catch (error) {
-    console.error('Failed to initialize Firebase Admin:', error.message);
-    console.warn('Proceeding without Firebase Admin. Verification will fail.');
+    console.error('Firebase Admin initialization error:', error.message);
 }
 
 module.exports = admin;

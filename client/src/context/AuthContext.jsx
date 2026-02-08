@@ -7,7 +7,7 @@ export const useAuth = () => useContext(AuthContext);
 
 // Configure Axios Base URL - Use environment variable for production
 const api = axios.create({
-  baseURL: window._env_?.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
 });
 
 export const AuthProvider = ({ children }) => {

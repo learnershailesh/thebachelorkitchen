@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, ArrowRight, Phone, Lock, Home, ShieldCheck, KeyRound } from 'lucide-react';
@@ -20,16 +20,24 @@ const Login = () => {
     const navigate = useNavigate();
 
 
-    const setupRecaptcha = () => {
+    useEffect(() => {
         if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'size': 'invisible',
-                'callback': (response) => {
-                    // reCAPTCHA solved, allow signInWithPhoneNumber.
+            window.recaptchaVerifier = new RecaptchaVerifier(
+                auth,
+                "recaptcha-container",
+                {
+                    size: "invisible",
+                    callback: () => {
+                        console.log("Recaptcha verified");
+                    },
                 }
-            });
+            );
+
+            // 🔥 VERY IMPORTANT
+            window.recaptchaVerifier.render();
         }
-    };
+    }, []);
+
 
     const handleSendOtp = async (e) => {
         e.preventDefault();
@@ -49,7 +57,6 @@ const Login = () => {
         setError("");
 
         try {
-            setupRecaptcha();
             const appVerifier = window.recaptchaVerifier;
             const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
             setConfirmationResult(confirmation);
