@@ -7,7 +7,7 @@ export const useAuth = () => useContext(AuthContext);
 
 // Configure Axios Base URL - Use environment variable for production
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_URL || (window.location.hostname === '127.0.0.1' ? 'http://127.0.0.1:5000/api' : 'http://localhost:5000/api'),
 });
 
 export const AuthProvider = ({ children }) => {
@@ -85,41 +85,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const sendEmailOtp = async (email) => {
-    try {
-      const { data } = await api.post('/auth/send-otp', { email });
-      return data;
-    } catch (error) {
-      throw error.response?.data?.message || 'Failed to send OTP';
-    }
-  };
-
-  const verifyEmailOtp = async (email, otp) => {
-    try {
-      const { data } = await api.post('/auth/verify-otp', { email, otp });
-
-      const userObj = {
-        _id: data._id,
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        role: data.role,
-        address: data.address
-      };
-
-      // Save Session
-      localStorage.setItem('tiffin_user', JSON.stringify(userObj));
-      localStorage.setItem('tiffin_token', data.token);
-
-      // Set State & Header
-      setUser(userObj);
-      api.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-
-      return userObj;
-    } catch (error) {
-      throw error.response?.data?.message || 'OTP verification failed';
-    }
-  };
 
   const updateProfile = async (userData) => {
     try {
@@ -183,7 +148,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, sendEmailOtp, verifyEmailOtp, firebaseLogin, loading, api }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, firebaseLogin, loading, api }}>
       {!loading && children}
     </AuthContext.Provider>
   );

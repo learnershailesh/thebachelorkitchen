@@ -166,7 +166,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
                     <div
                         onClick={() => setActiveTab('customers')}
                         className="card flex items-center gap-4 border border-blue-100 shadow-sm p-6 cursor-pointer hover:shadow-md transition hover:border-blue-200"
@@ -210,7 +210,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-4 border-b border-gray-200 mb-6 overflow-x-auto">
+                <div className="flex gap-4 border-b border-gray-200 mb-6 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                     <button
                         onClick={() => setActiveTab('deliveries')}
                         className={`pb-3 px-2 font-medium transition whitespace-nowrap ${activeTab === 'deliveries' ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]' : 'text-gray-500'}`}

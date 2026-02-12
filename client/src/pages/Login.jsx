@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Mail, ArrowRight, Phone, Lock, Home, ShieldCheck, KeyRound } from 'lucide-react';
@@ -7,66 +7,124 @@ import { auth } from '../config/firebase';
 
 const Login = () => {
     const [phone, setPhone] = useState('');
-    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [otp, setOtp] = useState('');
-    const [loginMethod, setLoginMethod] = useState('otp'); // Default to email otp
+    const [loginMethod, setLoginMethod] = useState('otp'); // Default to Mobile OTP
     const [otpSent, setOtpSent] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [confirmationResult, setConfirmationResult] = useState(null);
+    const [resendCountdown, setResendCountdown] = useState(0);
 
+    const recaptchaVerifierRef = useRef(null);
     const { login, firebaseLogin } = useAuth();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        let timer;
+        if (resendCountdown > 0) {
+            timer = setInterval(() => {
+                setResendCountdown(prev => prev - 1);
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [resendCountdown]);
 
     useEffect(() => {
-        if (!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(
-                auth,
-                "recaptcha-container",
-                {
-                    size: "invisible",
-                    callback: () => {
-                        console.log("Recaptcha verified");
-                    },
+        // Cleanup function for recaptcha
+        const cleanupRecaptcha = () => {
+            if (recaptchaVerifierRef.current) {
+                try {
+                    recaptchaVerifierRef.current.clear();
+                    recaptchaVerifierRef.current = null;
+                } catch (e) {
+                    console.error("Error clearing recaptcha:", e);
                 }
-            );
+            }
+        };
 
-            // 🔥 VERY IMPORTANT
-            window.recaptchaVerifier.render();
+        if (!auth || loginMethod !== 'otp') {
+            cleanupRecaptcha();
+            return;
         }
-    }, []);
 
+        // Initialize recaptcha if not already done
+        if (!recaptchaVerifierRef.current) {
+            try {
+                const verifier = new RecaptchaVerifier(
+                    auth,
+                    "recaptcha-container",
+                    {
+                        size: "invisible",
+                        callback: (response) => {
+                            console.log("Recaptcha verified (invisible).");
+                        },
+                        'expired-callback': () => {
+                            console.log("Recaptcha expired");
+                            cleanupRecaptcha();
+                        }
+                    }
+                );
+                recaptchaVerifierRef.current = verifier;
+            } catch (err) {
+                console.error("Failed to initialize ReCAPTCHA:", err);
+            }
+        }
+
+        return cleanupRecaptcha;
+    }, [auth, loginMethod]);
 
     const handleSendOtp = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
 
         if (!phone) {
             setError("Please enter your mobile number");
             return;
         }
 
-        // Format phone number to E.164 (Assuming Indian +91 for now, or user provides it)
-        let formattedPhone = phone.trim();
+        // Format phone number to E.164 (remove spaces, ensure + prefix)
+        let formattedPhone = phone.trim().replace(/\s+/g, '');
         if (!formattedPhone.startsWith('+')) {
             formattedPhone = `+91${formattedPhone}`;
         }
+
+        console.log("Sending OTP to:", formattedPhone);
 
         setLoading(true);
         setError("");
 
         try {
-            const appVerifier = window.recaptchaVerifier;
+            const appVerifier = recaptchaVerifierRef.current;
+            if (!appVerifier) {
+                throw new Error("reCAPTCHA not initialized. Please refresh the page.");
+            }
+
             const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+            console.log("Firebase Confirmation Result:", confirmation);
             setConfirmationResult(confirmation);
             setOtpSent(true);
+            setResendCountdown(30); // 30 seconds cooldown for resend
         } catch (err) {
-            console.error(err);
-            setError(err.message || "Failed to send OTP");
-            if (window.recaptchaVerifier) {
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = null;
+            console.error("OTP Send Error:", err);
+
+            if (err.code === 'auth/invalid-app-credential') {
+                setError("Firebase verification failed. Please check if your domain (e.g., localhost) is authorized in Firebase Console.");
+            } else if (err.code === 'auth/too-many-requests') {
+                setError("Too many requests. Please try again later.");
+            } else {
+                setError(err.message || "Failed to send OTP");
+            }
+
+            // Reset reCAPTCHA so user can try again
+            if (recaptchaVerifierRef.current) {
+                try {
+                    const widgetId = await recaptchaVerifierRef.current.render();
+                    if (window.grecaptcha) {
+                        window.grecaptcha.reset(widgetId);
+                    }
+                } catch (resetErr) {
+                    console.error("Error resetting recaptcha:", resetErr);
+                }
             }
         } finally {
             setLoading(false);
@@ -86,13 +144,22 @@ const Login = () => {
         try {
             const result = await confirmationResult.confirm(otp);
             const idToken = await result.user.getIdToken();
+            console.log("Firebase ID Token:", idToken);
+            console.log("Firebase User Object:", result);
 
             const loggedInUser = await firebaseLogin(idToken);
 
             if (loggedInUser.role === 'admin') navigate('/admin');
             else navigate('/dashboard');
         } catch (err) {
-            setError(err.message || 'Invalid OTP or User not found.');
+            console.error("OTP Verification Error:", err);
+            if (err.code === 'auth/code-expired') {
+                setError("OTP has expired. Please request a new one.");
+            } else if (err.code === 'auth/invalid-verification-code') {
+                setError("Invalid OTP. Please check the 6-digit code.");
+            } else {
+                setError(err.message || 'Invalid OTP or User not found.');
+            }
         } finally {
             setLoading(false);
         }
@@ -111,8 +178,8 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-2 md:p-4">
-            <div className="bg-white rounded-[20px] shadow-2xl overflow-hidden flex w-full max-w-4xl min-h-[500px] md:min-h-[600px]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-4 md:p-6 overflow-x-hidden">
+            <div className="bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col md:flex-row w-full max-w-4xl min-h-[500px] md:min-h-[600px] transform-gpu">
 
                 {/* Left Side - Brand & Hero (Hidden on Mobile) */}
                 <div className="hidden md:flex md:w-1/2 p-10 flex-col items-center justify-center bg-[var(--light)] relative overflow-hidden text-center animate-fade-in">
@@ -239,13 +306,29 @@ const Login = () => {
                                             autoFocus
                                         />
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => { setOtpSent(false); setOtp(''); }}
-                                        className="text-xs text-[var(--primary)] mt-2 font-bold hover:underline"
-                                    >
-                                        Change Mobile Number
-                                    </button>
+                                    <div className="flex justify-between items-center mt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => { setOtpSent(false); setOtp(''); }}
+                                            className="text-xs text-gray-500 font-bold hover:underline"
+                                        >
+                                            Change Number
+                                        </button>
+
+                                        {resendCountdown > 0 ? (
+                                            <span className="text-xs text-gray-400 font-bold">
+                                                Resend OTP in {resendCountdown}s
+                                            </span>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={handleSendOtp}
+                                                className="text-xs text-[var(--primary)] font-bold hover:underline"
+                                            >
+                                                Resend OTP
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 

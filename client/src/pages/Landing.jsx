@@ -157,7 +157,7 @@ const Landing = () => {
 
     const staticTestimonials = [
         { name: "Rahul S.", role: "Software Engineer", text: "The pause feature is a lifesaver! I travel a lot and never lose money now. Food is just like home." },
-        { name: "Priya M.", role: "Student", text: "Healthy diet plan helped me lose 3kgs. The paneer salad is amazing!" },
+        { name: "Priya M.", role: "Student", text: "Healthy diet plan helped me alot in weight gain. The paneer salad is amazing!" },
         { name: "Amit K.", role: "Banker", text: "Timely delivery every single day. The packaging is spill-proof and hygienic." }
     ];
 
@@ -173,7 +173,7 @@ const Landing = () => {
     const faqs = [
         { q: "Can I pause my meal for just one day?", a: "Yes! Use our Smart Calendar app to pause your meal before 10 PM the previous day. Your subscription validity will automatically extend by 1 day." },
         { q: "Is the packaging microwave safe?", a: "Absolutely. We use high-grade, BPA-free containers that can be directly safely heated in a microwave." },
-        { q: "Do you deliver on Sundays?", a: "Yes, we deliver lunch on Sundays. Sunday Dinner is usually not included to allow our staff a break, but we offer special Sunday Lunch specials!" }
+        { q: "Do you deliver on Sundays?", a: "Yes, we deliver lunch and Dinner both on Sundays." }
     ];
 
     return (
@@ -187,8 +187,8 @@ const Landing = () => {
             {/* Hero Section - Redesigned */}
             <header className="container py-10 md:py-24 animate-fade-in flex flex-col-reverse md:flex-row items-center gap-12 relative">
                 {/* Floating BG Blobs - Strengthened - Hidden on mobile for performance and clarity */}
-                <div className="hidden lg:block bg-blob w-96 h-96 bg-yellow-400 rounded-full top-0 -left-20 animate-float opacity-40"></div>
-                <div className="hidden lg:block bg-blob w-80 h-80 bg-green-300 rounded-full bottom-0 right-0 animate-float opacity-40" style={{ animationDelay: '2s' }}></div>
+                <div className="hidden lg:block bg-blob w-96 h-96 bg-yellow-400 rounded-full top-0 -left-20 animate-float opacity-40 pointer-events-none overflow-hidden"></div>
+                <div className="hidden lg:block bg-blob w-80 h-80 bg-green-300 rounded-full bottom-0 right-0 animate-float opacity-40 pointer-events-none overflow-hidden" style={{ animationDelay: '2s' }}></div>
 
                 <div className="flex-1 text-center md:text-left z-10">
                     <div className="inline-block bg-white/90 backdrop-blur-md border border-green-200 text-[var(--primary)] px-6 py-2 rounded-full text-sm font-bold mb-8 tracking-wide shadow-md transform hover:scale-105 transition cursor-default">
@@ -226,12 +226,12 @@ const Landing = () => {
                         <img src={heroTiffin} alt="Delicious Tiffin" className="rounded-[2rem] shadow-2xl border-4 border-white/50 w-full" />
 
                         {/* Floating Badge */}
-                        <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl border border-gray-100 animate-bounce" style={{ animationDuration: '3s' }}>
+                        <div className="absolute -bottom-4 md:-bottom-6 -left-2 md:-left-6 bg-white p-3 md:p-4 rounded-xl shadow-xl border border-gray-100 animate-bounce z-20" style={{ animationDuration: '3s' }}>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                                <span className="font-bold text-[var(--dark)]">Hygiene Checked</span>
+                                <div className="w-2 md:w-3 h-2 md:h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                <span className="font-bold text-[var(--dark)] text-xs md:text-base">Hygiene Checked</span>
                             </div>
-                            <div className="text-xs text-gray-500 pl-5">Temp: 65°C | Staff: Masked</div>
+                            <div className="text-[10px] md:text-xs text-gray-500 pl-4 md:pl-5">Temp: 65°C | Staff: Masked</div>
                         </div>
                     </div>
                     {/* Decorative blob behind */}
@@ -588,7 +588,7 @@ const Landing = () => {
                 <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                     <div>
                         <h3 className="text-white text-xl mb-4">The Bachelor's Kitchen</h3>
-                        <p className="opacity-70 text-sm">Delivering happiness, one tiffin at a time.</p>
+                        <p className="opacity-70 text-sm">Delivering happiness in meals.</p>
                     </div>
                     <div>
                         <h4 className="text-white mb-4">Quick Links</h4>

@@ -266,9 +266,9 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="container -mt-0 pt-8 px-4 md:px-0">
+            <div className="container py-8 px-4 md:px-0">
                 {/* Key Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
 
                     {/* 1. Subscription Progress */}
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
@@ -354,8 +354,8 @@ const Dashboard = () => {
                 </div>
 
                 {/* Quick Actions Row */}
-                <div className="flex gap-4 mb-10 overflow-x-auto pb-2 scrollbar-hide">
-                    <button className="flex items-center gap-3 px-6 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition whitespace-nowrap" onClick={() => document.getElementById('scheduler').scrollIntoView({ behavior: 'smooth' })}>
+                <div className="flex gap-4 mb-10 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+                    <button className="flex items-center gap-3 px-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition whitespace-nowrap" onClick={() => document.getElementById('scheduler').scrollIntoView({ behavior: 'smooth' })}>
                         <Calendar size={18} className="text-[var(--primary)]" />
                         <span className="font-bold text-gray-700">Skip Meals</span>
                     </button>

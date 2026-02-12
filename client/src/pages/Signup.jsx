@@ -86,8 +86,8 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-2 md:p-4">
-            <div className="relative bg-white rounded-[20px] shadow-2xl overflow-hidden flex w-full max-w-4xl min-h-[400px] md:min-h-[500px]">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--light)] p-4 md:p-6 overflow-x-hidden">
+            <div className="relative bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col md:flex-row w-full max-w-4xl min-h-[400px] md:min-h-[500px] transform-gpu">
 
                 {/* Left Side - Brand (Background on Mobile, Split on Desktop) */}
                 <div className="absolute inset-0 md:static md:w-1/2 p-10 flex flex-col items-center justify-center bg-[var(--light)] text-center animate-fade-in z-0">

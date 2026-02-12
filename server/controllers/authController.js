@@ -2,19 +2,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const User = require('../models/User');
-const nodemailer = require('nodemailer');
 const admin = require('../config/firebaseAdmin');
 
-// Nodemailer Transporter Configuration
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: process.env.SMTP_PORT == 465, // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
 
 // Generate JWT
 const generateToken = (id) => {
@@ -182,18 +171,21 @@ const firebaseLogin = asyncHandler(async (req, res) => {
             throw new Error('Phone number not found in Firebase token');
         }
 
+        // Normalize phone number (strip +91 for Indian numbers to match DB)
+        let normalizedPhone = phone_number || '';
+        if (normalizedPhone.startsWith('+91')) {
+            normalizedPhone = normalizedPhone.substring(3);
+        } else if (normalizedPhone.startsWith('+') && normalizedPhone.length > 10) {
+            // Generic fallback: take last 10 digits
+            normalizedPhone = normalizedPhone.slice(-10);
+        }
+
         // Find or create user
-        let user = await User.findOne({ phone: phone_number });
+        let user = await User.findOne({ phone: normalizedPhone });
 
         if (!user) {
-            // New user registration via Firebase
-            user = await User.create({
-                name: name || 'Firebase User',
-                phone: phone_number,
-                email: email || `${phone_number}@temp.com`, // Fallback email
-                password: await bcrypt.hash(Math.random().toString(36), 10), // Random password for new users
-                role: 'customer'
-            });
+            res.status(404);
+            throw new Error('No account found with this mobile number. Please sign up first.');
         }
 
         res.status(200).json({

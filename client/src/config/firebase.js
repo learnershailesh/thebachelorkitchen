@@ -20,12 +20,15 @@ if (!firebaseConfig.projectId) {
     console.error("FIREBASE ERROR: VITE_FIREBASE_PROJECT_ID is missing from environment variables!");
 }
 console.debug("Firebase Config Loaded for Project:", firebaseConfig.projectId);
+console.debug("Current Site Hostname (must be in Firebase Authorized Domains):", window.location.hostname);
 
 
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+console.log("Firebase app:", app);
+console.log("Firebase auth:", auth);
 
 
 
